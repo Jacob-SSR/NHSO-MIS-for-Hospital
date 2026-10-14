@@ -1,12 +1,16 @@
 {
-  "name": "nsho",
+  "name": "planfin-hc10909",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "notify": "node scripts/smt-notify.mjs",
+    "notify:test": "node scripts/smt-notify.mjs --test",
+    "notify:dry": "node scripts/smt-notify.mjs --dry-run",
+    "data:smt": "node scripts/fetch-smt-data.mjs"
   },
   "dependencies": {
     "next": "16.4.0",

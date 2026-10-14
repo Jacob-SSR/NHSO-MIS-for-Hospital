@@ -1,0 +1,69 @@
+/* Mint theme shared by both dashboards (loaded after each page's own <style>, same selectors so it wins). */
+:root{
+  --paper:#F3FBF8; --surface:#FFFFFF; --tint:#E7F8F1; --ink:#0E3B33; --muted:#557169; --rule:#CFEBE1;
+  --accent:#E2553D; --band:#DDF6EC; --band-fg:#0B4A3E; --band-muted:#2F6E5F; --track:#E2F4ED;
+  --good:#0F8A63; --warn:#A35F00; --head:#0C7A62;
+  --brand:#14A47F; --brand-strong:#0B8467; --brand-fg:#FFFFFF; --brand-soft:#C9F1E2;
+  --s1:#0FA07C; --s2:#EB6834; --s3:#2A78D6; --s4:#E9A000; --s5:#E87BA4; --s6:#5B7F13; --s7:#6A55D8; --s8:#E34948;
+  --shadow:0 1px 2px rgba(14,59,51,.05),0 6px 20px -8px rgba(14,59,51,.12);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#081713; --surface:#0F221D; --tint:#132C25; --ink:#E4F6EF; --muted:#9BBDB2; --rule:#21443A;
+  --accent:#F07259; --band:#0F2B24; --band-fg:#E9FBF4; --band-muted:#9FE3CB; --track:#173830;
+  --good:#4CCB98; --warn:#E3A548; --head:#7EE6C4;
+  --brand:#2CC79C; --brand-strong:#3FD8AC; --brand-fg:#05261E; --brand-soft:#16443A;
+  --s1:#34D1A6; --s2:#F07A47; --s3:#4C95EE; --s4:#E2AA2A; --s5:#E58AB0; --s6:#8DB33A; --s7:#9A8AF0; --s8:#EE6B6A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -10px rgba(0,0,0,.5);
+  color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --paper:#081713; --surface:#0F221D; --tint:#132C25; --ink:#E4F6EF; --muted:#9BBDB2; --rule:#21443A;
+  --accent:#F07259; --band:#0F2B24; --band-fg:#E9FBF4; --band-muted:#9FE3CB; --track:#173830;
+  --good:#4CCB98; --warn:#E3A548; --head:#7EE6C4;
+  --brand:#2CC79C; --brand-strong:#3FD8AC; --brand-fg:#05261E; --brand-soft:#16443A;
+  --s1:#34D1A6; --s2:#F07A47; --s3:#4C95EE; --s4:#E2AA2A; --s5:#E58AB0; --s6:#8DB33A; --s7:#9A8AF0; --s8:#EE6B6A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -10px rgba(0,0,0,.5);
+  color-scheme:dark; }
+
+/* masthead: soft mint band with a subtle gradient instead of a flat block */
+header.mast{background:linear-gradient(135deg,var(--band) 0%,color-mix(in srgb,var(--band) 70%,var(--brand-soft)) 100%);border-bottom:1px solid var(--rule);padding-block:22px 20px}
+header.mast h1{font-size:clamp(22px,3.2vw,32px)}
+.eyebrow{background:var(--brand-strong);color:var(--brand-fg);border-radius:999px;padding:3px 12px}
+.live{background:var(--brand);margin-right:8px;vertical-align:1px}
+.updated{display:block;line-height:1.7}
+
+/* surfaces */
+.panel,.tile,details.grp{border-radius:14px;box-shadow:var(--shadow)}
+.tile{border-top:3px solid var(--brand)}
+.tile .v{color:var(--head)}
+thead th{background:var(--band);color:var(--band-fg);font-weight:600}
+.heat thead th:first-child{background:var(--band)}
+select,input[type=search]{border-radius:10px;padding:7px 12px;transition:border-color .15s,box-shadow .15s}
+select:hover,input[type=search]:hover{border-color:var(--brand)}
+select:focus,input[type=search]:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 25%,transparent)}
+button:focus-visible,select:focus-visible,input:focus-visible,.chip:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+
+/* primary controls in mint instead of near-black ink */
+.btn{background:var(--brand-strong);border-color:var(--brand-strong);color:var(--brand-fg);border-radius:10px}
+.btn.ghost{background:var(--surface);color:var(--ink);border-color:var(--rule)}
+.btn.ghost:hover{border-color:var(--brand);color:var(--head)}
+.seg{border-radius:10px;padding:2px;gap:2px;background:var(--tint)}
+.seg button{border-radius:8px}
+.seg button+button{border-left:0}
+.seg button[aria-pressed=true]{background:var(--brand-strong);color:var(--brand-fg);box-shadow:var(--shadow)}
+.chip.chk[aria-pressed=true]{border-color:var(--brand);background:var(--brand-soft)}
+.chip.chk[aria-pressed=true] b{background:var(--brand-strong);border-color:var(--brand-strong);color:var(--brand-fg)}
+.tabs{border-bottom:2px solid var(--brand)}
+.tabs button{border-radius:10px 10px 0 0}
+.tabs button[aria-selected=true]{background:var(--brand-strong);border-color:var(--brand-strong);color:var(--brand-fg)}
+.xp button,.xp-all{border-radius:8px}
+.xp button:hover,.xp-all:hover{border-color:var(--brand);color:var(--head)}
+.rank.top{border-color:var(--brand);color:var(--head)}
+.fund-row.sel{box-shadow:inset 3px 0 0 var(--brand)}
+.drop{border-radius:14px}
+.drop.over{border-color:var(--brand)}
+#xpMsg{background:var(--brand-strong);color:var(--brand-fg);border-radius:10px}
+footer{border-top:1px solid var(--rule);margin-top:24px}
+
+/* inside the app shell the shell already shows the brand bar; keep the page compact */
+html.embed header.mast{padding-block:16px 14px}
+html.embed header.mast h1{margin-top:8px}
