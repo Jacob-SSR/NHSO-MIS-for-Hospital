@@ -1,0 +1,29 @@
+# docker compose up -d --build  ->  http://<server>:5200
+# Run on a machine in Thailand: smt.nhso.go.th and mishos.nhso.go.th refuse connections from abroad.
+
+services:
+  web:
+    build: .
+    image: planfin-hc10909:latest
+    ports:
+      - "5200:5200"
+    volumes:
+      - planfin-data:/app/data
+    restart: unless-stopped
+
+  worker:
+    image: planfin-hc10909:latest
+    command: ["node", "scripts/scheduler.mjs"]
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - planfin-data:/app/data
+    depends_on:
+      - web
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+
+volumes:
+  planfin-data:

@@ -29,7 +29,7 @@ export async function smtPost(path, body, { tries = 3 } = {}) {
       if (!res.ok) throw new Error(`SMT ${path} HTTP ${res.status}`);
       return await res.json();
     } catch (e) {
-      lastErr = e;
+      lastErr = e.cause ? new Error(`${e.message} (${e.cause.code || e.cause.message}) — ${SMT_API}${path}`) : e;
       await new Promise((r) => setTimeout(r, 1500 * (t + 1)));
     }
   }
