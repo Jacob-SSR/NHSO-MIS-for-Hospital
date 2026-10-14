@@ -1,0 +1,945 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>เงินโอน สปสช. บุรีรัมย์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&family=Sarabun:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+<style>
+/* Layout: dark-teal masthead band (from the hospital deck), one filter row, then stacked comparison sections — summary first, transactions last */
+:root{
+  --paper:#F2FAF7; --surface:#FFFFFF; --tint:#E4F5EE; --ink:#123B33; --muted:#557069; --rule:#C9E4D9;
+  --accent:#C8321E; --band:#A8E6CF; --band-fg:#0F3B30; --band-muted:#25604F; --track:#DDF1E9;
+  --good:#1f7a4d; --warn:#a15c00; --head:#1A9A78;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#6250d6; --s8:#e34948;
+  --f-display:"Prompt","Sarabun","Leelawadee UI",Tahoma,sans-serif;
+  --f-body:"Prompt","Sarabun","Leelawadee UI",Tahoma,system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0B1A16; --surface:#11241F; --tint:#163029; --ink:#E6F5EF; --muted:#9FBDB3; --rule:#264A3F;
+  --accent:#E35A43; --band:#1F6B57; --band-fg:#F0FBF7; --band-muted:#BDF2E0; --track:#1D3A32;
+  --good:#4cc08a; --warn:#e0a040; --head:#8BEBCB;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+  color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --paper:#0B1A16; --surface:#11241F; --tint:#163029; --ink:#E6F5EF; --muted:#9FBDB3; --rule:#264A3F;
+  --accent:#E35A43; --band:#1F6B57; --band-fg:#F0FBF7; --band-muted:#BDF2E0; --track:#1D3A32;
+  --good:#4cc08a; --warn:#e0a040; --head:#8BEBCB;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+  color-scheme:dark; }
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px}
+header.mast{background:var(--band);color:var(--band-fg);padding-block:28px 26px}
+.eyebrow{display:inline-block;background:var(--accent);color:#fff;font-family:var(--f-display);font-weight:500;font-size:12.5px;letter-spacing:.04em;padding:3px 10px;border-radius:3px}
+h1{font-family:var(--f-display);font-weight:600;font-size:clamp(26px,4vw,38px);line-height:1.2;margin:12px 0 6px;text-wrap:balance}
+.mast p{margin:0;color:var(--band-muted);max-width:70ch}
+.toolbar{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:flex-end;padding-block:16px;border-bottom:1px solid var(--rule)}
+.ctl{display:flex;flex-direction:column;gap:5px;min-width:0}
+.ctl>span{font-size:12px;color:var(--muted);letter-spacing:.03em}
+select,input[type=search]{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:6px 10px}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:6px;overflow:hidden;background:var(--surface)}
+.seg button{font:inherit;font-size:14px;border:0;background:transparent;color:var(--ink);padding:6px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:14px;display:inline-flex;align-items:center;gap:7px;border:1px solid var(--rule);background:var(--surface);color:var(--ink);border-radius:999px;padding:4px 12px 4px 9px;cursor:pointer}
+.chip[aria-pressed=false]{opacity:.45}
+.chip.chk{opacity:1}
+.chip.chk b{width:15px;height:15px;border:1.5px solid var(--muted);border-radius:3px;display:inline-grid;place-items:center;font-size:11px;line-height:1;font-weight:700}
+.chip.chk[aria-pressed=true]{border-color:var(--ink);background:var(--tint)}
+.chip.chk[aria-pressed=true] b{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.chip:disabled{opacity:.35;cursor:not-allowed}
+.chip i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.btn{font:inherit;font-size:14px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:6px;padding:6px 14px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+button:focus-visible,select:focus-visible,input:focus-visible,.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.note{font-size:13px;color:var(--muted)}
+#msg{min-height:1.2em}
+#msg.ok{color:var(--good)} #msg.err{color:var(--accent)}
+section{padding-block:30px 6px}
+.sec-h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:10px 20px;margin-bottom:14px}
+.sec-h .k{font-family:var(--f-display);font-size:12.5px;color:var(--head);opacity:.85;letter-spacing:.05em}
+h2{font-family:var(--f-display);font-weight:600;font-size:22px;color:var(--head);margin:2px 0 0;line-height:1.25;text-wrap:balance}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:18px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--rule)}
+th:first-child,td:first-child{text-align:left}
+thead th{background:var(--band);color:var(--band-fg);font-weight:500;font-size:13px;position:sticky;top:0}
+tbody tr:nth-child(even) td{background:var(--tint)}
+td.wrap-t{white-space:normal;min-width:180px;text-align:left}
+.hn{display:inline-flex;align-items:center;gap:8px;font-weight:600}
+.hn i{width:10px;height:10px;border-radius:50%;flex:none}
+.cellbar{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.cellbar b{display:block;height:6px;border-radius:0 3px 3px 0;background:var(--muted);opacity:.55}
+.pill{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;border:1px solid currentColor}
+.pill.warn{color:var(--warn)} .pill.good{color:var(--good)}
+.muted{color:var(--muted)}
+/* fund bars */
+.fund-row{display:grid;grid-template-columns:minmax(150px,240px) 1fr;gap:6px 16px;padding-block:9px;border-bottom:1px solid var(--rule);cursor:pointer}
+.fund-row:hover,.fund-row.sel{background:var(--tint)}
+.fund-row.sel{box-shadow:inset 3px 0 0 var(--accent)}
+.fund-name{font-weight:600;font-size:14px;line-height:1.35;padding-left:8px;min-width:0}
+.fund-name small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.bars{display:flex;flex-direction:column;gap:3px;min-width:0}
+.bar-line{display:flex;align-items:center;gap:8px;min-width:0}
+.bar{height:11px;border-radius:0 4px 4px 0;min-width:2px;flex:none}
+.bar-line span{font-size:12.5px;color:var(--ink);white-space:nowrap}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:50%}
+.grid2{display:grid;grid-template-columns:1fr;gap:18px}
+@media (min-width:900px){.grid2{grid-template-columns:3fr 2fr}}
+.grid2>*{min-width:0}
+#trend svg{width:100%;height:auto;display:block}
+#trend text{fill:var(--muted);font-size:12px;font-family:var(--f-body)}
+.tip{position:fixed;pointer-events:none;z-index:20;background:var(--surface);color:var(--ink);border:1px solid var(--rule);border-radius:6px;padding:8px 10px;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.15);max-width:300px}
+.tip .r{display:flex;justify-content:space-between;gap:14px}
+.tip .r i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+.tabs{display:flex;gap:4px;margin-top:22px;border-bottom:2px solid var(--ink);overflow-x:auto}
+.tabs button{font:inherit;font-family:var(--f-display);font-weight:500;font-size:15px;border:1px solid var(--rule);border-bottom:0;background:var(--surface);color:var(--muted);padding:9px 16px;border-radius:6px 6px 0 0;cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tabs .cnt{font-family:var(--f-body);font-size:12.5px;opacity:.8}
+.linkbtn{font:inherit;font-size:13.5px;background:none;border:0;color:var(--accent);cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px}
+.empty{padding:24px;text-align:center;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+.tile{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:14px 16px;min-width:0}
+.tile .l{font-size:12.5px;color:var(--muted)}
+.tile .v{font-family:var(--f-display);font-weight:600;font-size:24px;line-height:1.3}
+.tile .c{font-size:13px;color:var(--muted)}
+.home-tag{display:inline-block;font-size:11.5px;font-weight:500;background:var(--accent);color:#fff;border-radius:3px;padding:0 6px;margin-left:6px;vertical-align:1px}
+tr.home td{box-shadow:inset 0 1px 0 var(--accent),inset 0 -1px 0 var(--accent)}
+tr.home td:first-child{box-shadow:inset 3px 0 0 var(--accent),inset 0 1px 0 var(--accent),inset 0 -1px 0 var(--accent)}
+.up{color:var(--ink)} .dn{color:var(--accent)}
+.rank{display:inline-block;min-width:44px;text-align:center;font-size:12.5px;border:1px solid var(--rule);border-radius:999px;padding:0 8px}
+.rank.top{border-color:var(--ink);font-weight:600}
+footer{padding-block:30px 40px;color:var(--muted);font-size:13px}
+.drop{border:1.5px dashed var(--rule);border-radius:8px;padding:10px 14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.drop.over{border-color:var(--accent);background:var(--tint)}
+@media (max-width:640px){
+  .fund-row{grid-template-columns:1fr}
+  .wrap{padding-inline:16px}
+}
+@media (prefers-reduced-motion:no-preference){.bar{transition:width .35s ease}}
+h3,.sub-h{color:var(--head)}
+body{font-weight:400;font-size:14.5px}
+</style>
+
+<style>
+.rk-row{display:grid;grid-template-columns:28px minmax(120px,190px) 1fr;gap:4px 12px;align-items:center;padding-block:5px;border-bottom:1px solid var(--rule)}
+.rk-row.me{background:var(--tint)}
+.rk-name{font-size:13.5px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rk-bar{display:flex;align-items:center;min-width:0;width:100%}
+.rk-bar>i{display:block;height:16px;flex:none}
+.rk-bar>i:nth-last-of-type(1){border-radius:0 4px 4px 0}
+.rk-stack{display:flex;height:16px;border-radius:0 4px 4px 0;overflow:hidden;flex:none;min-width:2px}
+.rk-stack i{display:block;height:100%}
+.rk-bar span{font-size:12.5px;white-space:nowrap}
+.xp{display:inline-flex;gap:6px;margin-left:auto}
+.xp button,.xp-all{font:inherit;font-size:12.5px;padding:4px 10px;border:1px solid var(--rule);background:var(--surface);color:var(--ink);border-radius:6px;cursor:pointer}
+.xp button:hover,.xp-all:hover{border-color:var(--ink)}
+.xp-all{margin-left:auto;align-self:center}
+.src-note{margin:8px 0 0;font-size:12px}.src-note a{color:inherit}
+.xp-busy{opacity:.5;pointer-events:none}
+#xpMsg{position:fixed;right:16px;bottom:16px;background:var(--ink);color:var(--paper);padding:8px 14px;border-radius:8px;font-size:13px;z-index:50;display:none}
+
+.rk-bar>i+i{margin-left:1px}
+.yoy-row{display:grid;grid-template-columns:minmax(120px,200px) 1fr;gap:4px 12px;align-items:center;padding-block:6px;border-bottom:1px solid var(--rule)}
+.yoy-row .bars{display:flex;flex-direction:column;gap:3px;min-width:0}
+@media (max-width:640px){.yoy-row{grid-template-columns:1fr}}
+@media (max-width:640px){.rk-row{grid-template-columns:24px 1fr}.rk-bar{grid-column:1 / -1}}
+.sub-h{font-family:var(--f-display);font-weight:500;font-size:16px;margin:20px 0 8px}
+.chg-up{color:var(--good)} .chg-dn{color:var(--accent)}
+details.grp{border:1px solid var(--rule);border-radius:8px;background:var(--surface);padding:8px 12px;margin-top:12px}
+details.grp summary{cursor:pointer;font-weight:600;font-size:14px}
+details.grp summary .muted{font-weight:400}
+.grp-tools{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 8px}
+.chip.sm{font-size:13px;padding:3px 10px}
+.chip.home-c{border-color:var(--s1)}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+.heat td.hc{text-align:right;font-size:13px}
+.heat th.vh{white-space:nowrap;font-size:12px;line-height:1.3;vertical-align:bottom}
+.heat td:first-child,.heat th:first-child{position:sticky;left:0;z-index:1;background:var(--surface)}
+.heat thead th:first-child{background:var(--band)}
+.heat tbody tr:nth-child(even) td:first-child{background:var(--tint)}
+.heat th.me{box-shadow:inset 0 -3px 0 var(--s1)}
+.heat th.cp{box-shadow:inset 0 -3px 0 var(--s2)}
+.updated{display:inline-flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--band-muted)}
+.updated b{color:var(--band-fg);font-weight:500}
+.live{width:8px;height:8px;border-radius:50%;background:#4cc08a;display:inline-block}
+.ghost-line{opacity:.9}
+.tx-ctl{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+</style>
+
+<link rel="stylesheet" href="../mint.css">
+<script>try{if(window.top!==window.self)document.documentElement.classList.add("embed")}catch(e){}</script>
+
+<header class="mast">
+  <div class="wrap">
+    <span class="eyebrow">สปสช. เขต 9 นครราชสีมา · จังหวัดบุรีรัมย์</span>
+    <h1>การโอนเงินกองทุนหลักประกันสุขภาพ รายหน่วยบริการ</h1>
+    <p id="mastSub">กำลังโหลดข้อมูลจากระบบ Smart Money Transfer…</p>
+    <div class="updated" id="updated"></div>
+    <div style="margin-top:6px;font-size:12.5px;color:var(--band-muted);letter-spacing:.03em">Design by Moveon · Orapat Viriyaudomsiri</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="toolbar">
+    <label class="ctl"><span>ปีงบประมาณ</span><select id="fy"></select></label>
+    <label class="ctl"><span>โรงพยาบาลของเรา</span><select id="home"></select></label>
+    <label class="ctl"><span>เทียบกับ</span><select id="cmp"></select></label>
+    <div class="ctl"><span>ช่วงเดือน</span><div style="display:flex;gap:6px;align-items:center"><select id="m0" aria-label="ตั้งแต่เดือน"></select><span class="muted">ถึง</span><select id="m1" aria-label="ถึงเดือน"></select></div></div>
+    <label class="ctl"><span>คอลัมน์ที่ใช้คำนวณ</span>
+      <select id="measure">
+        <option value="rem" selected>ยอดโอนเข้าบัญชีจริง (หลังชะลอ/หัก)</option>
+        <option value="amt">จำนวนเงิน (ยอดจัดสรร)</option>
+        <option value="delay">ชะลอการโอน</option>
+        <option value="ded">หักจากยอดโอน (+หลักประกัน/ภาษี)</option>
+        <option value="off">จำนวนเงินรอหักกลบ</option>
+      </select></label>
+    <div class="ctl"><span>สิทธิ (เลือกได้หลายสิทธิ)</span><div class="chips" id="rights"></div></div>
+  </div>
+
+  <details class="grp" id="grpBox">
+    <summary>กลุ่ม รพ. ที่ใช้เปรียบเทียบและจัดอันดับ <span class="muted" id="grpCount"></span></summary>
+    <div class="grp-tools">
+      <button type="button" class="chip sm" data-preset="community">รพ.ชุมชน ทั้งหมด</button>
+      <button type="button" class="chip sm" data-preset="all">ทุกหน่วยบริการในจังหวัด</button>
+      <button type="button" class="chip sm" data-preset="size">รพ.เรา + ขนาดใกล้เคียง 5 แห่ง</button>
+      <button type="button" class="chip sm" data-preset="pair">เฉพาะ รพ.เรา + รพ. ที่เทียบ</button>
+    </div>
+    <div class="chips" id="hosps"></div>
+  </details>
+
+  <nav class="tabs" role="tablist" aria-label="หน้า">
+    <button type="button" role="tab" id="tab-ov" data-tab="ov" aria-selected="true">หน้า 1 · ภาพรวมและการเทียบ</button>
+    <button type="button" role="tab" id="tab-tx" data-tab="tx" aria-selected="false">หน้า 2 · รายการโอนเงิน <span class="cnt" id="tabCnt"></span></button>
+    <button type="button" class="btn ghost xp-all" id="xpAll" title="ส่งออกทุกส่วนเป็นไฟล์ Excel (ตาราง + ภาพกราฟ)">⬇ Excel ทั้งหมด</button>
+  </nav>
+
+  <div id="pg-ov" role="tabpanel" aria-labelledby="tab-ov">
+  <section id="s-home">
+    <div class="sec-h"><div><div class="k">รพ. ของเรา</div><h2 id="homeH">เทียบกับ รพ. อื่น</h2></div>
+      <div class="note" id="homeNote"></div></div>
+    <div class="tiles" id="homeTiles"></div>
+    <div class="panel">
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px">
+        <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+          <div class="chips" id="multiChips"></div>
+          <div class="legend" id="legHome"></div>
+        </div>
+        <div class="seg" id="homeScale"><button type="button" data-v="abs" aria-pressed="true">บาท</button><button type="button" data-v="pct" aria-pressed="false">% ของยอดรวม รพ.</button></div>
+      </div>
+      <div id="homeChart"></div>
+    </div>
+    <details class="grp" style="margin-top:12px"><summary>ดูเป็นตารางตัวเลข</summary><div class="scroll" style="margin-top:10px"><table id="tHome"></table></div></details>
+    <h3 class="sub-h">เงินเข้าล่าสุดของ รพ.เรา</h3>
+    <div class="panel scroll"><table id="tRecent"></table></div>
+    <p class="note">สัดส่วน = ยอดกองทุนนั้นหารด้วยยอดรวมของ รพ. เอง ใช้เทียบ รพ. ที่ขนาดต่างกันได้ · อันดับคิดจาก รพ. ในกลุ่มเปรียบเทียบ เรียงจากยอดมากไปน้อย</p>
+  </section>
+
+  <section id="s-hosp">
+    <div class="sec-h"><div><div class="k">อันดับในจังหวัด</div><h2>ยอดโอนรายโรงพยาบาล</h2></div>
+      <div class="note" id="periodNote"></div></div>
+    <div class="panel">
+      <div class="legend" id="legRank" style="margin-bottom:10px"></div>
+      <div id="rankChart"></div>
+    </div>
+    <details class="grp" style="margin-top:12px"><summary>ดูเป็นตารางตัวเลข</summary><div class="scroll" style="margin-top:10px"><table id="tHosp"></table></div></details>
+    <p class="note">ยอดจัดสรร = "จำนวนเงิน" ในรายงาน · โอนเข้าบัญชีสุทธิ = "คงเหลือ" หลังชะลอการโอน หักยอด หลักประกันสัญญา และภาษี · รอหักกลบ = ยอดที่ สปสช. ตั้งรอหักในงวดถัดไป</p>
+  </section>
+
+  <section id="s-yoy">
+    <div class="sec-h"><div><div class="k">เทียบปีก่อน</div><h2 id="yoyH">ปีนี้เทียบปีก่อน ช่วงเดือนเดียวกัน</h2></div>
+      <div class="note" id="yoyNote"></div></div>
+    <div class="panel"><div class="legend" id="legYoy" style="margin-bottom:10px"></div><div id="yoyChart"></div></div><details class="grp" style="margin-top:12px"><summary>ดูเป็นตารางตัวเลข</summary><div class="scroll" style="margin-top:10px"><table id="tYoy"></table></div></details>
+    <p class="note">เทียบช่วงเดือนเดียวกันของปีงบก่อนหน้า เช่น ต.ค.–มี.ค. 69 เทียบ ต.ค.–มี.ค. 68 · % เปลี่ยนของกลุ่มคิดจากยอดรวมทั้งกลุ่ม</p>
+  </section>
+
+  <section id="s-fund">
+    <div class="sec-h"><div><div class="k">แยกตามกองทุน</div><h2 id="fundH">ยอดเงินรายกองทุน</h2></div>
+      <div class="ctl"><span>แสดงเป็น</span><div class="seg" id="scale">
+        <button type="button" data-v="abs" aria-pressed="true">บาท</button>
+        <button type="button" data-v="pct" aria-pressed="false">% ของยอดรวม รพ.</button></div></div>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="legend" id="legFund" style="margin-bottom:8px"></div>
+        <div id="fundBars"></div>
+        <p class="note" style="margin-bottom:0">กดที่กองทุนเพื่อดูกองทุนย่อย และกรองรายการโอนในหน้า 2</p>
+      </div>
+      <div class="panel" style="align-self:start">
+        <h3 style="font-family:var(--f-display);font-weight:500;font-size:16px;margin:0 0 4px" id="subTitle">กองทุนย่อย</h3>
+        <div class="note" id="subNote" style="margin-bottom:10px">เลือกกองทุนจากกราฟด้านซ้าย</div>
+        <div class="scroll"><table id="tSub"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="s-heat">
+    <div class="sec-h"><div><div class="k">ทุก รพ. ในกลุ่ม</div><h2>สัดส่วนรายกองทุนของแต่ละ รพ.</h2></div>
+      <div class="note">ตัวเลข = % ของยอดรวม รพ. นั้น · สีเข้ม = สัดส่วนสูง</div></div>
+    <div class="panel scroll" style="padding:0"><table id="tHeat" class="heat"></table></div>
+  </section>
+
+  <section id="s-right">
+    <div class="sec-h"><div><div class="k">แยกตามสิทธิ</div><h2>ยอดเงินแต่ละสิทธิ รายโรงพยาบาล</h2></div>
+      <div class="seg" id="rtScale"><button type="button" data-v="pct" aria-pressed="true">สัดส่วน %</button><button type="button" data-v="abs" aria-pressed="false">บาท</button></div></div>
+    <div class="panel"><div class="legend" id="legRight" style="margin-bottom:10px"></div><div id="rightChart"></div></div><details class="grp" style="margin-top:12px"><summary>ดูเป็นตารางตัวเลข</summary><div class="scroll" style="margin-top:10px"><table id="tRight"></table></div></details>
+  </section>
+
+  <section id="s-trend">
+    <div class="sec-h"><div><div class="k">รายเดือน</div><h2>ยอดโอนตามเดือนในปีงบประมาณ</h2></div>
+      <div class="seg" id="cum"><button type="button" data-v="m" aria-pressed="true">รายเดือน</button><button type="button" data-v="c" aria-pressed="false">สะสม</button></div></div>
+    <div class="panel"><div class="legend" id="legTrend" style="margin-bottom:6px"></div><div id="trend"></div></div>
+  </section>
+
+  <section id="s-hold">
+    <div class="sec-h"><div><div class="k">ติดตาม</div><h2>ยอดชะลอการโอนและหักจากยอดโอน รายโรงพยาบาล</h2></div></div>
+    <div class="panel"><div class="legend" id="legHold" style="margin-bottom:10px"></div><div id="holdChart"></div></div><details class="grp" style="margin-top:12px"><summary>ดูเป็นตารางตัวเลข</summary><div class="scroll" style="margin-top:10px"><table id="tHold"></table></div></details>
+  </section>
+
+  <section id="s-appeal">
+    <div class="sec-h"><div><div class="k">อุทธรณ์</div><h2>รายการอุทธรณ์ รายโรงพยาบาล</h2></div>
+      <div class="note">นับจากรายการที่เลขงวดมีคำว่า "อุทธรณ์"</div></div>
+    <div class="panel"><div class="legend" id="legAppeal" style="margin-bottom:10px"></div><div id="appealChart"></div></div><details class="grp" style="margin-top:12px"><summary>ดูเป็นตารางตัวเลข</summary><div class="scroll" style="margin-top:10px"><table id="tAppeal"></table></div></details>
+  </section>
+  </div>
+
+  <div id="pg-tx" role="tabpanel" aria-labelledby="tab-tx" hidden>
+  <section id="s-tx">
+    <div class="sec-h"><div><div class="k">รายละเอียด</div><h2>รายการโอนเงิน</h2></div>
+      <div class="tx-ctl">
+        <span id="fundFilter"></span>
+        <label class="ctl"><span>โรงพยาบาล</span><select id="txH"></select></label>
+        <label class="ctl"><span>ค้นหา งวด / Batch / กองทุนย่อย</span><input type="search" id="q" placeholder="เช่น IP_02, อุทธรณ์"></label></div></div>
+    <div class="panel scroll" style="padding:0"><table id="tTx"></table></div>
+    <div style="margin-top:10px;display:flex;gap:12px;align-items:center"><button type="button" class="btn ghost" id="more">แสดงเพิ่ม</button><span class="note" id="txCount"></span></div>
+  </section>
+  </div>
+
+  <div class="drop" id="drop" style="margin-top:28px">
+    <label class="btn ghost" for="file" style="display:inline-block">+ เพิ่มไฟล์ Excel (สำรอง)</label>
+    <input type="file" id="file" accept=".xlsx,.xls" multiple hidden>
+    <span class="note">ปกติไม่ต้องอัปโหลด ข้อมูลอัปเดตจากระบบ SMT ของ สปสช. อัตโนมัติ · ใช้ปุ่มนี้เมื่อต้องการเพิ่มไฟล์ "รายงานเอกสารการโอนเงินแยกตามหน่วยงาน" ที่ยังไม่มีในหน้า (เก็บในเบราว์เซอร์นี้เท่านั้น)</span>
+    <button type="button" class="btn ghost" id="reset" hidden>ล้างไฟล์ที่เพิ่ม</button>
+    <span id="msg" class="note"></span>
+  </div>
+
+  <footer>ที่มา: สปสช. ระบบ Smart Money Transfer (smt.nhso.go.th) รายงานการโอนเงินงบกองทุน แยกตามหน่วยบริการ · ปีงบประมาณนับจากวันที่โอน (1 ต.ค. – 30 ก.ย.) · สิทธิตามแหล่งงบในระบบ SMT: UC = บัตรทอง, LGO = อปท., DSS = ประกันสังคมคนพิการ<div style="margin-top:10px;font-family:var(--f-display);font-weight:500;color:var(--ink);letter-spacing:.02em">Design by Moveon · Orapat Viriyaudomsiri</div></footer>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+const TH_M = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const FY_M = ['ต.ค.','พ.ย.','ธ.ค.','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.'];
+const RIGHTS = {UC:'บัตรทอง (UC)',LGO:'อปท. (LGO)',SSS:'ประกันสังคม คนพิการ (DSS)',OFC:'ข้าราชการ (OFC)',FRN:'ต่างด้าว'};
+const SRC2RT = {UC:'UC',LGO:'LGO',DSS:'SSS',SSS:'SSS',OFC:'OFC'};
+const COMMUNITY = ['10895','10896','10897','10898','10899','10900','10901','10902','10904','10905','10906','10907','10908','10909','10910','10911','10912','10913','10914','11619','23578','28020'];
+const FUND_MAP = [
+  [/ส่วนท้องถิ่น/,'อปท. จ่ายตรงหน่วยบริการ'],[/ประกันสังคม/,'ประกันสังคม คนพิการ'],
+  [/รายได้สูง\(ต่ำ\)/,'เงินจ่ายจากรายได้สูง(ต่ำ)กว่าค่าใช้จ่ายสะสม'],[/ช่วยเหลือเบื้องต้น/,'เงินช่วยเหลือเบื้องต้น'],[/กันดาร/,'พื้นที่กันดาร/เสี่ยงภัย'],
+  [/ผู้ป่วยนอก/,'OP ผู้ป่วยนอก'],[/ผู้ป่วยใน/,'IP ผู้ป่วยใน'],[/สร้างเสริมสุขภาพ/,'PP ส่งเสริมสุขภาพป้องกันโรค'],
+  [/CENTRAL\s*REIMBURSE/i,'CR จ่ายตามรายการ'],[/ไตวาย/,'ไตวายเรื้อรัง'],[/เอดส์/,'HIV/AIDS'],
+  [/เบาหวาน/,'DM/HT และจิตเวชในชุมชน'],[/งบลงทุน/,'งบลงทุน (ค่าเสื่อม)'],[/แพทย์แผนไทย/,'แพทย์แผนไทย'],
+  [/ฟื้นฟู/,'ฟื้นฟูสมรรถภาพ'],[/ปฐมภูมิ/,'ปฐมภูมิเพิ่มเติม'],[/กำไรสะสม/,'กำไรสะสม (มติบอร์ด)']];
+const C_HOME='var(--s1)', C_CMP='var(--s2)', C_GRP='var(--muted)';
+
+function num(v){ if(typeof v==='number') return v; if(v==null||v==='') return 0; const x=parseFloat(String(v).replace(/,/g,'')); return isNaN(x)?0:x; }
+function rightOf(fund,acct){
+  if(/ส่วนท้องถิ่น/.test(fund)||/80[12]/.test(acct)) return 'LGO';
+  if(/ประกันสังคม/.test(fund)) return 'SSS';
+  if(/ข้าราชการ|กรมบัญชีกลาง/.test(fund)) return 'OFC';
+  if(/ต่างด้าว/.test(fund)) return 'FRN';
+  return 'UC';
+}
+function fundLabel(f){ for(const [re,l] of FUND_MAP) if(re.test(f)) return l; return f||'ไม่ระบุกองทุน'; }
+const shortName=n=>String(n||'').trim().replace(/^โรงพยาบาล/,'รพ.');
+function mkDate(d,m,y){ return {d,m,y,fy:m>=10?y+1:y, fm:(m+2)%12, key:y*10000+m*100+d}; }
+function parseDate(v){
+  let d,m,y;
+  if(v instanceof Date){ d=v.getDate(); m=v.getMonth()+1; y=v.getFullYear(); }
+  else if(typeof v==='number' && window.XLSX){ const p=XLSX.SSF.parse_date_code(v); if(!p) return null; d=p.d; m=p.m; y=p.y; }
+  else { const s=String(v||'').trim();
+    let r=s.match(/^(\d{1,2})\s*([ก-๙.]+)\s*(\d{4})$/);
+    if(r){ d=+r[1]; m=TH_M.indexOf(r[2].replace(/\s/g,''))+1; y=+r[3]; if(!m) return null; }
+    else if((r=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/))){ d=+r[1]; m=+r[2]; y=+r[3]; }
+    else return null; }
+  if(y<2400) y+=543;
+  return mkDate(d,m,y);
+}
+function mkRow(h,dt,batch,per,acct,fund,sub,amt,delay,ded,rem,off,rt){
+  return {h,fy:dt.fy,fm:dt.fm,dk:dt.key,ds:`${dt.d} ${TH_M[dt.m-1]} ${String(dt.y).slice(2)}`,batch,per,acct,fund,sub,fl:fundLabel(fund),rt,amt,delay,ded,rem,off};
+}
+/* Excel export (AOA) of one NHSO report -> {code,name,rows} */
+function parseAOA(aoa){
+  let code='',name='',hi=-1;
+  for(let i=0;i<Math.min(aoa.length,15);i++){
+    const t=String(aoa[i][0]||'');
+    const r=t.match(/หน่วยบริการ\s+(\d{5})\s+(.+)/); if(r){code=r[1];name=r[2].trim();}
+    if(t.trim()==='ลำดับ'){hi=i;break;}
+  }
+  if(hi<0||!code) throw new Error('ไม่พบหัวตาราง "ลำดับ" หรือรหัสหน่วยบริการ — ต้องเป็นไฟล์รายงานเอกสารการโอนเงินแยกตามหน่วยงานจาก สปสช.');
+  const H=aoa[hi].map(x=>String(x).trim()); const c=n=>H.indexOf(n);
+  const ix={date:c('วันที่โอน'),batch:c('Batch No.'),per:c('งวด/เลขที่เบิกจ่าย'),acct:c('รหัสผังบัญชี สป.สธ.'),fund:c('กองทุน'),sub:c('กองทุนย่อยเฉพาะด้าน'),
+    amt:c('จำนวนเงิน'),delay:c('ชะลอการโอน'),ded:c('รายการหักจากยอดโอนเงิน'),bond:c('หลักประกันสัญญา'),tax:c('ภาษี'),rem:c('คงเหลือ'),off:c('จำนวนเงินรอหักกลบ')};
+  const rows=[];
+  for(let i=hi+1;i<aoa.length;i++){
+    const a=aoa[i]; if(!a||String(a[0]).trim()==='รวม') continue;
+    const dt=parseDate(a[ix.date]); if(!dt) continue;
+    const fund=String(a[ix.fund]||'').trim(), acct=String(a[ix.acct]||'').trim();
+    rows.push(mkRow(code,dt,String(a[ix.batch]||''),String(a[ix.per]||''),acct,fund,String(a[ix.sub]||'').trim(),
+      num(a[ix.amt]),num(a[ix.delay]),num(a[ix.ded])+num(a[ix.bond])+num(a[ix.tax]),num(a[ix.rem]),num(a[ix.off]),rightOf(fund,acct)));
+  }
+  return {code,name:shortName(name),rows};
+}
+/* data.json from SMT -> rows */
+function parseSMT(d){
+  const D=d.dict, out=[];
+  for(const r of d.rows){
+    const k=r[1], dt=mkDate(k%100,Math.floor(k/100)%100,Math.floor(k/10000));
+    const fund=D[r[5]], acct=D[r[4]], src=D[r[12]];
+    out.push(mkRow(r[0],dt,D[r[2]],D[r[3]],acct,fund,D[r[6]],r[7],r[8],r[9],r[10],r[11],SRC2RT[src]||rightOf(fund,acct)));
+  }
+  return out;
+}
+
+/* ---------- store ---------- */
+const HOSP={}; let ROWS=[]; let BASE={rows:[],hosp:{}}; let META=null;
+function ensureH(code,name){ if(!HOSP[code]) HOSP[code]={name,on:true}; else if(name&&!HOSP[code].name) HOSP[code].name=name; }
+function addParsed(p){
+  ensureH(p.code,p.name);
+  const fys=new Set(p.rows.map(r=>r.fy)), mk=new Set(p.rows.map(r=>r.fy*100+r.fm));
+  ROWS=ROWS.filter(r=>!(r.h===p.code&&mk.has(r.fy*100+r.fm))).concat(p.rows);
+  return {fys,mk};
+}
+function loadBase(){ for(const k in HOSP) delete HOSP[k];
+  Object.entries(BASE.hosp).forEach(([c,n])=>ensureH(c,shortName(n))); ROWS=BASE.rows.slice(); }
+const LS='nhso-transfer-uploads-v2';
+function loadUploads(){ try{ const s=localStorage.getItem(LS); return s?JSON.parse(s):[]; }catch(e){ return []; } }
+function saveUploads(list){ try{ localStorage.setItem(LS,JSON.stringify(list)); return true; }catch(e){ return false; } }
+let uploads=loadUploads();
+
+/* ---------- state ---------- */
+const S={fy:null,measure:'rem',rights:new Set(),scale:'abs',cum:'m',m0:0,m1:11,home:null,cmp:'SIZE',homeScale:'abs',rtScale:'pct',multi:null,fund:null,q:'',limit:50,txH:'HOME',preset:'community'};
+const $=id=>document.getElementById(id);
+const fmt=v=>v.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmt0=v=>Math.round(v).toLocaleString('th-TH');
+const mb=v=>(v/1e6).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2})+' ลบ.';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const MLABEL={amt:'ยอดจัดสรร',delay:'ชะลอการโอน',ded:'หักจากยอดโอน',rem:'โอนเข้าบัญชีสุทธิ',off:'รอหักกลบ'};
+const LS_HOME='nhso-transfer-home-v1', LS_GRP='nhso-transfer-group-v1';
+function lsGet(k){ try{ return localStorage.getItem(k);}catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v);}catch(e){} }
+
+function fyList(){ return [...new Set(ROWS.map(r=>r.fy))].sort((a,b)=>b-a); }
+function allCodes(){ return Object.keys(HOSP).sort(); }
+function grpH(){ const g=allCodes().filter(h=>HOSP[h].on); if(!g.includes(S.home)) g.unshift(S.home); return g; }
+function sizeFY(){ const fys=fyList(); const full=fys.filter(f=>f<Math.max(...fys)); return full.length?Math.max(...full):Math.max(...fys); }
+function sizePeers(n=5){ const fy=sizeFY(); const t={}; ROWS.forEach(r=>{ if(r.fy===fy) t[r.h]=(t[r.h]||0)+r.amt; }); const me=t[S.home]||0;
+  return Object.keys(t).filter(h=>h!==S.home&&t[h]>0).sort((a,b)=>Math.abs(t[a]-me)-Math.abs(t[b]-me)).slice(0,n); }
+const LS_MULTI='nhso-transfer-multi-v1';
+function multi(){ if(!Array.isArray(S.multi)){ let m=null; try{ m=JSON.parse(lsGet(LS_MULTI)||'null'); }catch(e){} S.multi=Array.isArray(m)&&m.length?m:sizePeers(4); }
+  S.multi=S.multi.filter(h=>HOSP[h]&&h!==S.home).slice(0,5); return S.multi; }
+function setMulti(a){ S.multi=a.filter(h=>h!==S.home).slice(0,5); lsSet(LS_MULTI,JSON.stringify(S.multi)); }
+const MCOL=['var(--s2)','var(--s3)','var(--s4)','var(--s5)','var(--s7)'];
+function refCodes(){ const G=grpH(); return S.cmp==='AVG'?G.filter(h=>h!==S.home):S.cmp==='SIZE'?multi():[S.cmp]; }
+function cmpLabel(){ return S.cmp==='AVG'?'เฉลี่ยกลุ่ม':S.cmp==='SIZE'?`เฉลี่ย ${multi().length} รพ. ที่เลือกเทียบ`:nm(S.cmp); }
+function isRef(h){ return S.cmp==='SIZE'?multi().includes(h):h===S.cmp; }
+function hcolor(h){ return h===S.home?C_HOME:(isRef(h)?C_CMP:C_GRP); }
+function dot(h){ return `<i class="dot" style="background:${hcolor(h)}"></i>`; }
+function nm(h){ return HOSP[h]?HOSP[h].name:h; }
+function baseRows(){ return ROWS.filter(r=>r.fy===S.fy&&r.fm>=S.m0&&r.fm<=S.m1&&(S.rights.size===0||S.rights.has(r.rt))); }
+function sum(rows,k){ let s=0; for(const r of rows) s+=r[k]; return s; }
+function groupBy(rows,f){ const m=new Map(); for(const r of rows){ const k=f(r); if(!m.has(k)) m.set(k,[]); m.get(k).push(r);} return m; }
+function applyPreset(p){ S.preset=p; const set=p==='all'?allCodes():p==='size'?[S.home,...sizePeers()]:p==='pair'?[S.home,...(S.cmp==='AVG'?[]:refCodes())]:COMMUNITY;
+  allCodes().forEach(h=>HOSP[h].on=set.includes(h)); lsSet(LS_GRP,JSON.stringify(allCodes().filter(h=>HOSP[h].on))); }
+
+function buildControls(){
+  const fys=fyList(); if(!fys.includes(S.fy)){ const c={}; ROWS.forEach(r=>c[r.fy]=(c[r.fy]||0)+1); S.fy=fys.slice().sort((a,b)=>c[b]-c[a]||b-a)[0]; }
+  $('fy').innerHTML=fys.map(y=>`<option value="${y}" ${y===S.fy?'selected':''}>ปีงบประมาณ ${y}</option>`).join('');
+  const fyM=new Set(ROWS.filter(r=>r.fy===S.fy).map(r=>r.fm));
+  const mopt=(sel)=>FY_M.map((m,i)=>`<option value="${i}" ${i===sel?'selected':''}>${m} ${String(i<3?S.fy-1:S.fy).slice(2)}${fyM.has(i)?'':' (ไม่มีข้อมูล)'}</option>`).join('');
+  $('m0').innerHTML=mopt(S.m0); $('m1').innerHTML=mopt(S.m1);
+  const present=new Set(ROWS.filter(r=>r.fy===S.fy).map(r=>r.rt));
+  const allOn=S.rights.size===0;
+  $('rights').innerHTML=`<button type="button" class="chip chk" data-r="ALL" aria-pressed="${allOn}"><b>${allOn?'✓':''}</b>ทุกสิทธิ</button>`+
+    Object.keys(RIGHTS).map(k=>{ const has=present.has(k), on=!allOn&&S.rights.has(k);
+      return `<button type="button" class="chip chk" data-r="${k}" aria-pressed="${on}" ${has?'':'disabled title="ไม่มีรายการสิทธินี้ในปีงบที่เลือก"'}><b>${on?'✓':''}</b>${RIGHTS[k]}</button>`; }).join('');
+  if(!HOSP[S.home]) S.home=HOSP['10909']?'10909':allCodes()[0];
+  const opt=(h,sel)=>`<option value="${h}" ${h===sel?'selected':''}>${esc(nm(h))} (${h})</option>`;
+  $('home').innerHTML=allCodes().map(h=>opt(h,S.home)).join('');
+  const G=grpH();
+  if(S.cmp!=='AVG'&&S.cmp!=='SIZE'&&(!HOSP[S.cmp]||S.cmp===S.home)) S.cmp='SIZE';
+  $('cmp').innerHTML=`<option value="SIZE" ${S.cmp==='SIZE'?'selected':''}>รพ. ที่เลือกเทียบ (${multi().length} แห่ง)</option><option value="AVG" ${S.cmp==='AVG'?'selected':''}>ค่าเฉลี่ยกลุ่ม (${G.filter(h=>h!==S.home).length} แห่ง)</option>`+allCodes().filter(h=>h!==S.home).map(h=>opt(h,S.cmp)).join('');
+  $('hosps').innerHTML=allCodes().map(h=>{ const has=ROWS.some(r=>r.h===h&&r.fy===S.fy);
+    return `<button type="button" class="chip sm ${h===S.home?'home-c':''}" data-h="${h}" aria-pressed="${HOSP[h].on||h===S.home}" title="${h}${has?'':' · ไม่มีข้อมูลปีงบนี้'}">${esc(nm(h))}${h===S.home?' · รพ.เรา':''}${has?'':' <span class="muted">(ไม่มีข้อมูล)</span>'}</button>`}).join('');
+  $('grpCount').textContent=`(${G.length} จาก ${allCodes().length} แห่ง · กดเพื่อเปิด/ปิด)`;
+  $('reset').hidden=uploads.length===0;
+  $('txH').innerHTML=`<option value="HOME" ${S.txH==='HOME'?'selected':''}>${esc(nm(S.home))} (รพ.เรา)</option>`+
+    (S.cmp!=='AVG'&&S.cmp!=='SIZE'?`<option value="PAIR" ${S.txH==='PAIR'?'selected':''}>รพ.เรา + ${esc(nm(S.cmp))}</option>`:'')+
+    `<option value="GRP" ${S.txH==='GRP'?'selected':''}>ทุก รพ. ในกลุ่ม (${G.length} แห่ง)</option>`+
+    allCodes().filter(h=>h!==S.home).map(h=>`<option value="${h}" ${S.txH===h?'selected':''}>${esc(nm(h))}</option>`).join('');
+}
+
+function hstats(rows,H){ const g=groupBy(rows,r=>r.h);
+  return H.map(h=>{ const rs=g.get(h)||[]; return {h,n:rs.length,amt:sum(rs,'amt'),delay:sum(rs,'delay'),ded:sum(rs,'ded'),rem:sum(rs,'rem'),off:sum(rs,'off')}; }); }
+
+function renderHome(rows){
+  const G=grpH(), me=S.home, k=S.measure, peers=G.filter(h=>h!==me);
+  const refs=refCodes(), n=refs.length;
+  const CL=cmpLabel();
+  $('homeH').textContent=`${nm(me)} เทียบกับ ${CL}`;
+  if(!ROWS.some(r=>r.h===me&&r.fy===S.fy)){ $('homeNote').textContent=''; $('homeTiles').innerHTML='';
+    $('tHome').innerHTML=`<tbody><tr><td class="empty">ยังไม่มีข้อมูลของ ${esc(nm(me))} ในปีงบประมาณ ${S.fy}</td></tr></tbody>`; return; }
+  const ST=Object.fromEntries(hstats(rows,[...new Set([...G,...refs])]).map(s=>[s.h,s]));
+  const m=ST[me];
+  const ref=key=>n?refs.reduce((a,h)=>a+ST[h][key],0)/n:0;
+  const rankOf=key=>1+peers.filter(h=>ST[h][key]>m[key]).length;
+  const net=x=>x.amt?x.rem/x.amt*100:0, refNet=n?refs.reduce((a,h)=>a+net(ST[h]),0)/n:0;
+  $('homeNote').textContent=`อันดับในกลุ่ม ${peers.length+1} แห่ง · ขนาดวัดจากยอดจัดสรรทั้งปีงบ ${sizeFY()}`;
+  const tile=(l,v,c)=>`<div class="tile"><div class="l">${l}</div><div class="v">${v}</div><div class="c">${c}</div></div>`;
+  $('homeTiles').innerHTML=
+    tile('ยอดจัดสรร',mb(m.amt),n?`อันดับ ${rankOf('amt')} จาก ${peers.length+1} · ${esc(CL)} ${mb(ref('amt'))}`:'')+
+    tile('โอนเข้าบัญชีสุทธิ',mb(m.rem),n?`${sign(m.rem-ref('rem'),mb)} เทียบ ${esc(CL)}`:'')+
+    tile('สุทธิ / จัดสรร',net(m).toFixed(1)+'%',n?`${esc(CL)} ${refNet.toFixed(1)}%`:'')+
+    tile('ชะลอ + หักจากยอดโอน',mb(m.delay+m.ded),n?`${esc(CL)} ${mb(ref('delay')+ref('ded'))} · รอหักกลบ ${mb(m.off)}`:`รอหักกลบ ${mb(m.off)}`);
+  if(!n){ $('tHome').innerHTML='<tbody><tr><td class="empty">เลือก รพ. ที่จะเทียบ หรือเพิ่ม รพ. ในกลุ่มเปรียบเทียบ</td></tr></tbody>'; return; }
+  const all=[...new Set([me,...peers,...refs])];
+  const tot={}; all.forEach(h=>tot[h]=sum(rows.filter(r=>r.h===h),k));
+  const g=groupBy(rows.filter(r=>all.includes(r.h)),r=>r.fl);
+  const list=[...g.keys()].map(f=>{ const v={}; all.forEach(h=>v[h]=0); g.get(f).forEach(r=>v[r.h]+=r[k]);
+    const sh=h=>tot[h]?v[h]/tot[h]*100:0;
+    const a=refs.reduce((s,h)=>s+v[h],0)/n, as=refs.reduce((s,h)=>s+sh(h),0)/n;
+    return {f,me:v[me],a,ms:sh(me),as,rank:1+peers.filter(h=>v[h]>v[me]).length}; }).sort((x,y)=>y.me-x.me||y.a-x.a);
+  const refTot=refs.reduce((s,h)=>s+tot[h],0)/n;
+  $('tHome').innerHTML=`<thead><tr><th>กองทุน (${MLABEL[k]})</th><th>${esc(nm(me))}</th><th>${esc(CL)}</th><th>ส่วนต่าง (บาท)</th><th>สัดส่วน รพ.เรา</th><th>สัดส่วน ${esc(CL)}</th><th>ต่าง (จุด%)</th><th>อันดับในกลุ่ม</th></tr></thead><tbody>`+
+    list.map(r=>`<tr><td><strong>${esc(r.f)}</strong></td><td>${fmt(r.me)}</td><td>${fmt(r.a)}</td><td class="${r.me-r.a<0?'dn':'up'}">${sign(r.me-r.a,fmt)}</td><td>${r.ms.toFixed(1)}%</td><td class="muted">${r.as.toFixed(1)}%</td><td class="${r.ms-r.as<0?'dn':'up'}">${sign(r.ms-r.as,x=>x.toFixed(1))}</td><td><span class="rank ${r.rank===1?'top':''}">${r.rank}/${peers.length+1}</span></td></tr>`).join('')+
+    `<tr><td><strong>รวมทุกกองทุน</strong></td><td><strong>${fmt(tot[me])}</strong></td><td><strong>${fmt(refTot)}</strong></td><td>${sign(tot[me]-refTot,fmt)}</td><td>100%</td><td class="muted">100%</td><td></td><td><span class="rank">${1+peers.filter(h=>tot[h]>tot[me]).length}/${peers.length+1}</span></td></tr></tbody>`;
+  // grouped bar chart: home + each selected hospital (or the single reference), per fund
+  const pct=S.homeScale==='pct';
+  const SER=S.cmp==='SIZE'?[me,...multi()].map((h,i)=>({h,label:nm(h),color:i?MCOL[(i-1)%MCOL.length]:C_HOME})):[{h:me,label:nm(me),color:C_HOME},{h:'REF',label:CL,color:C_CMP}];
+  const fv={}; SER.forEach(s=>{ if(s.h!=='REF'){ tot[s.h]=tot[s.h]??sum(rows.filter(r=>r.h===s.h),k); } });
+  const fundsAll=[...g.keys()];
+  const val=(s,f)=>{ if(s.h==='REF'){ const r=list.find(x=>x.f===f); return r?(pct?r.as:r.a):0; } const v=(g.get(f)||[]).filter(r=>r.h===s.h).reduce((a,r)=>a+r[k],0); return pct?(tot[s.h]?v/tot[s.h]*100:0):v; };
+  // ensure rows of selected hospitals are included in g
+  const gAll=groupBy(rows.filter(r=>SER.some(s=>s.h===r.h)),r=>r.fl);
+  const val2=(s,f)=>{ if(s.h==='REF') return val(s,f); const v=(gAll.get(f)||[]).filter(r=>r.h===s.h).reduce((a,r)=>a+r[k],0); const T=sum(rows.filter(r=>r.h===s.h),k); return pct?(T?v/T*100:0):v; };
+  const FL=[...new Set([...gAll.keys(),...fundsAll])].map(f=>({f,v:SER.map(s=>val2(s,f))})).filter(x=>x.v.some(Boolean)).sort((a,b)=>b.v[0]-a.v[0]||Math.max(...b.v)-Math.max(...a.v));
+  const mx=Math.max(1e-9,...FL.flatMap(x=>x.v.map(Math.abs)));
+  const lab=v=>pct?v.toFixed(1)+'%':(Math.abs(v)>=1e6||v===0?mb(v):(v/1e3).toLocaleString('th-TH',{maximumFractionDigits:1})+' พันบ.');
+  const shortN=t=>String(t).replace(/^รพ\./,'');
+  $('legHome').innerHTML=SER.map(s=>`<span><i style="background:${s.color}"></i>${esc(s.label)}</span>`).join('');
+  const others=allCodes().filter(h=>h!==me&&!multi().includes(h));
+  $('multiChips').innerHTML=S.cmp==='SIZE'?(multi().map((h,i)=>`<button type="button" class="chip sm" data-rm="${h}" title="เอาออก"><i style="background:${MCOL[i%MCOL.length]}"></i>${esc(nm(h))} ✕</button>`).join('')+
+    (multi().length<5?`<select id="addMulti" aria-label="เพิ่ม รพ. ที่เทียบ" style="font-size:13px"><option value="">+ เพิ่ม รพ.</option>${others.map(h=>`<option value="${h}">${esc(nm(h))}</option>`).join('')}</select>`:'')+
+    `<button type="button" class="chip sm" id="sizeBtn">ใช้ 4 รพ. ขนาดใกล้เคียง</button>`):'<span class="note">เลือก "รพ. ที่เลือกเทียบ" ในช่อง "เทียบกับ" ด้านบน เพื่อเทียบหลาย รพ. พร้อมกัน</span>';
+  $('homeChart').innerHTML=FL.map(x=>`<div class="fund-row" style="cursor:default"><div class="fund-name">${esc(x.f)}</div><div class="bars">`+
+    x.v.map((v,i)=>`<div class="bar-line" data-tip="${esc(SER[i].label)}|${esc(x.f)}|${lab(v)}"><div class="bar" style="width:calc(${Math.max(0,v)/mx} * (100% - 200px));background:${SER[i].color}"></div><span>${lab(v)} <span class="muted" style="font-size:12px">· ${esc(shortN(SER[i].label))}</span></span></div>`).join('')+`</div></div>`).join('')
+}
+
+function renderHosp(rows){
+  const G=grpH(), k=S.measure;
+  const dk=rows.map(r=>r.dk);
+  if(dk.length){ const a=Math.min(...dk),b=Math.max(...dk); const f=x=>`${x%100} ${TH_M[Math.floor(x/100)%100-1]} ${Math.floor(x/10000)}`;
+    $('periodNote').textContent=`วันที่โอน ${f(a)} – ${f(b)} · เรียงตาม${MLABEL[k]}`; }
+  const stats=hstats(rows,G).sort((a,b)=>b[k]-a[k]);
+  const mx=Math.max(1,...stats.map(s=>Math.abs(s[k])));
+  const tot=stats.reduce((a,s)=>{for(const x of ['n','amt','delay','ded','rem','off']) a[x]+=s[x]; return a;},{n:0,amt:0,delay:0,ded:0,rem:0,off:0});
+  // ranked stacked bar chart: net transfer + withheld + deducted = allocation
+  const mxA=Math.max(1,...stats.map(s=>Math.max(s.amt,s[k])));
+  const single=k!=='amt'&&k!=='rem';
+  $('legRank').innerHTML=single?`<span><i style="background:var(--s1)"></i>รพ.เรา</span><span><i style="background:var(--s2)"></i>รพ. ที่เลือกเทียบ</span><span><i style="background:var(--muted)"></i>รพ. อื่น</span> <span class="muted">· ${MLABEL[k]}</span>`:
+    `<span><i style="background:var(--s1)"></i>โอนสุทธิ รพ.เรา</span><span><i style="background:var(--s2)"></i>โอนสุทธิ รพ. ที่เลือกเทียบ</span><span><i style="background:var(--muted)"></i>โอนสุทธิ รพ. อื่น</span><span><i style="background:var(--s4)"></i>ชะลอการโอน</span><span><i style="background:var(--s8)"></i>หักจากยอดโอน</span> <span class="muted">· ความยาวแท่ง = ยอดจัดสรร</span>`;
+  $('rankChart').innerHTML=stats.map((s,i)=>{ const c=hcolor(s.h), w=v=>Math.max(0,v)/mxA;
+    const segs=single?`<i style="width:calc(${w(s[k])} * (100% - 150px));background:${c}"></i>`:
+      `<i style="width:calc(${w(s.rem)} * (100% - 150px));background:${c}" title="โอนสุทธิ ${fmt(s.rem)}"></i><i style="width:calc(${w(s.delay)} * (100% - 150px));background:var(--s4)" title="ชะลอ ${fmt(s.delay)}"></i><i style="width:calc(${w(s.ded)} * (100% - 150px));background:var(--s8)" title="หัก ${fmt(s.ded)}"></i>`;
+    const pct=s.amt?s.rem/s.amt*100:0;
+    return `<div class="rk-row ${s.h===S.home?'me':''}"><span class="muted" style="font-size:12.5px;text-align:right">${i+1}</span><span class="rk-name" title="${esc(nm(s.h))}">${esc(nm(s.h))}${s.h===S.home?' <span class="home-tag">รพ.เรา</span>':''}</span>
+      <div class="rk-bar">${segs}<span style="margin-left:8px">${single?mb(s[k]):mb(s.amt)+' <span class="muted">· สุทธิ '+pct.toFixed(0)+'%</span>'}</span></div></div>`; }).join('');
+  $('tHosp').innerHTML=`<thead><tr><th>#</th><th style="text-align:left">โรงพยาบาล</th><th>${MLABEL[k]}</th><th>ยอดจัดสรร</th><th>ชะลอการโอน</th><th>หักจากยอดโอน</th><th>โอนเข้าบัญชีสุทธิ</th><th>รอหักกลบ</th><th>สุทธิ/จัดสรร</th><th>รายการ</th></tr></thead><tbody>`+
+    stats.map((s,i)=>{ const pct=s.amt?s.rem/s.amt*100:0;
+      return `<tr class="${s.h===S.home?'home':''}"><td>${i+1}</td><td style="text-align:left"><span class="hn">${dot(s.h)}${esc(nm(s.h))} <span class="muted" style="font-weight:400">${s.h}</span>${s.h===S.home?'<span class="home-tag">รพ.เรา</span>':''}</span></td>
+      <td><div class="cellbar"><b style="width:${Math.max(2,Math.abs(s[k])/mx*140)}px;background:${hcolor(s.h)};opacity:${s.h===S.home||s.h===S.cmp?1:.5}"></b></div></td>
+      <td>${fmt(s.amt)}</td><td>${fmt(s.delay)}</td><td>${fmt(s.ded)}</td><td><strong>${fmt(s.rem)}</strong></td><td>${fmt(s.off)}</td>
+      <td><span class="pill ${pct<90?'warn':'good'}">${pct.toFixed(1)}%</span></td><td>${fmt0(s.n)}</td></tr>`; }).join('')+
+    `<tr><td></td><td style="text-align:left"><strong>รวม ${stats.length} แห่ง</strong></td><td></td><td>${fmt(tot.amt)}</td><td>${fmt(tot.delay)}</td><td>${fmt(tot.ded)}</td><td><strong>${fmt(tot.rem)}</strong></td><td>${fmt(tot.off)}</td><td></td><td>${fmt0(tot.n)}</td></tr></tbody>`;
+}
+
+function pairSeries(){ // [{key,label,color,codes}] home + compare target
+  const G=grpH(), peers=G.filter(h=>h!==S.home);
+  const s=[{key:S.home,label:nm(S.home),color:C_HOME,codes:[S.home]}];
+  if(S.cmp==='AVG'){ if(peers.length) s.push({key:'AVG',label:`เฉลี่ยกลุ่ม (${peers.length} แห่ง)`,color:C_CMP,codes:peers}); }
+  else if(S.cmp==='SIZE'){ const sp=sizePeers(); if(sp.length) s.push({key:'AVG',label:`เฉลี่ย รพ.ขนาดใกล้เคียง (${sp.length} แห่ง)`,color:C_CMP,codes:sp}); }
+  else s.push({key:S.cmp,label:nm(S.cmp),color:C_CMP,codes:[S.cmp]});
+  return s;
+}
+function legendHTML(ser){ return ser.map(s=>`<span><i style="background:${s.color}"></i>${esc(s.label)}</span>`).join(''); }
+
+function renderFunds(rows){
+  const k=S.measure, ser=pairSeries(); $('legFund').innerHTML=legendHTML(ser);
+  $('fundH').textContent=`ยอดเงินรายกองทุน · ${ser.map(s=>s.label).join(' เทียบ ')}`;
+  const val=(rs,s)=>sum(rs.filter(r=>s.codes.includes(r.h)),k)/s.codes.length;
+  const sTot=ser.map(s=>val(rows,s));
+  const pv=(rs,s,i)=>{ if(s.key!=='AVG') return sTot[i]?val(rs,s)/sTot[i]*100:0;
+    const per=s.codes.map(h=>{ const t=sum(rows.filter(r=>r.h===h),k); return t?sum(rs.filter(r=>r.h===h),k)/t*100:0; }); return per.reduce((a,b)=>a+b,0)/per.length; };
+  const scope=rows.filter(r=>ser.some(s=>s.codes.includes(r.h)));
+  const g=groupBy(scope,r=>r.fl);
+  const funds=[...g.keys()].map(f=>{ const rs=g.get(f); const v=ser.map(s=>val(rs,s)); const p=ser.map((s,i)=>pv(rs,s,i));
+    return {f,v,p,t:Math.max(...v.map(Math.abs)),full:[...new Set(rs.map(r=>r.fund))].join(' / ')}; }).sort((a,b)=>b.v[0]-a.v[0]||b.t-a.t);
+  const mx=Math.max(1e-9,...funds.flatMap(f=>(S.scale==='pct'?f.p:f.v).map(Math.abs)));
+  $('fundBars').innerHTML=funds.length?funds.map(f=>`<div class="fund-row ${S.fund===f.f?'sel':''}" data-f="${esc(f.f)}" tabindex="0" role="button" aria-label="ดูรายละเอียด ${esc(f.f)}">
+    <div class="fund-name">${esc(f.f)}<small>${esc(f.full)}</small></div>
+    <div class="bars">${ser.map((s,i)=>{ const x=S.scale==='pct'?f.p[i]:f.v[i];
+      return `<div class="bar-line" data-tip="${esc(s.label)}|${esc(f.f)}|${fmt(f.v[i])}|${f.p[i].toFixed(1)}"><div class="bar" style="width:calc(${Math.max(0,x)/mx} * (100% - 110px));background:${s.color}"></div><span>${S.scale==='pct'?f.p[i].toFixed(1)+'%':mb(f.v[i])}</span></div>`}).join('')}</div></div>`).join('')
+    :'<div class="empty">ไม่มีข้อมูลตามตัวกรอง</div>';
+  renderSub(rows,ser);
+}
+
+function renderSub(rows,ser){
+  const k=S.measure;
+  if(!S.fund){ $('subTitle').textContent='กองทุนย่อย'; $('subNote').textContent='เลือกกองทุนจากกราฟด้านซ้าย'; $('tSub').innerHTML=''; return; }
+  const rs=rows.filter(r=>r.fl===S.fund);
+  $('subTitle').textContent=S.fund; $('subNote').innerHTML=`${MLABEL[k]} แยกตามกองทุนย่อยเฉพาะด้าน (บาท) · <button type="button" class="linkbtn" data-go="tx">ดูรายการโอนของกองทุนนี้ (หน้า 2) →</button>`;
+  const g=groupBy(rs,r=>r.sub||'—');
+  const val=(x,s)=>sum(x.filter(r=>s.codes.includes(r.h)),k)/s.codes.length;
+  const subs=[...g.keys()].map(s=>({s,v:ser.map(z=>val(g.get(s),z))})).sort((a,b)=>b.v[0]-a.v[0]||b.v[1]-a.v[1]);
+  $('tSub').innerHTML=`<thead><tr><th>กองทุนย่อย</th>${ser.map(s=>`<th>${esc(s.label)}</th>`).join('')}</tr></thead><tbody>`+
+    subs.map(x=>`<tr><td class="wrap-t">${esc(x.s)}</td>${x.v.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>`).join('')+
+    `<tr><td><strong>รวม</strong></td>${ser.map(s=>`<td><strong>${fmt(val(rs,s))}</strong></td>`).join('')}</tr></tbody>`;
+}
+
+function renderHeat(rows){
+  const G=grpH(), k=S.measure;
+  const tot={}; G.forEach(h=>tot[h]=0); rows.forEach(r=>{ if(r.h in tot) tot[r.h]+=r[k]; });
+  const H=G.slice().sort((a,b)=>(b===S.home)-(a===S.home)||(b===S.cmp)-(a===S.cmp)||tot[b]-tot[a]);
+  const g=groupBy(rows.filter(r=>r.h in tot),r=>r.fl);
+  const funds=[...g.keys()].map(f=>{ const v={}; H.forEach(h=>v[h]=0); g.get(f).forEach(r=>v[r.h]+=r[k]); return {f,v,t:Object.values(v).reduce((a,b)=>a+b,0)}; }).sort((a,b)=>b.t-a.t);
+  const cell=(x,t)=>{ const p=t?x/t*100:0; const a=Math.min(1,Math.max(0,p/40));
+    return `<td class="hc" style="background:color-mix(in srgb, var(--s1) ${Math.round(a*55)}%, transparent)" title="${fmt(x)} บาท">${p?p.toFixed(1):'–'}</td>`; };
+  $('tHeat').innerHTML=`<thead><tr><th>กองทุน</th>${H.map(h=>`<th class="vh ${h===S.home?'me':h===S.cmp?'cp':''}">${esc(nm(h).replace(/^รพ\./,''))}</th>`).join('')}</tr></thead><tbody>`+
+    funds.map(f=>`<tr><td><strong>${esc(f.f)}</strong></td>${H.map(h=>cell(f.v[h],tot[h])).join('')}</tr>`).join('')+
+    `<tr><td><strong>ยอดรวม (ลบ.)</strong></td>${H.map(h=>`<td class="hc"><strong>${(tot[h]/1e6).toFixed(1)}</strong></td>`).join('')}</tr></tbody>`;
+}
+
+
+const RCOL={UC:'var(--s1)',LGO:'var(--s3)',SSS:'var(--s7)',OFC:'var(--s2)',FRN:'var(--s5)'};
+function rankRows(items,mx){ // items:[{h,segs:[{v,c,t}],lab}]
+  return items.length?items.map((s,i)=>`<div class="rk-row ${s.h===S.home?'me':''}"><span class="muted" style="font-size:12.5px;text-align:right">${i+1}</span><span class="rk-name" title="${esc(nm(s.h))}">${esc(nm(s.h))}${s.h===S.home?' <span class="home-tag">รพ.เรา</span>':''}</span>
+    <div class="rk-bar">${s.segs.filter(g=>g.v>0).map(g=>`<i style="width:calc(${g.v/mx} * (100% - 170px));background:${g.c}" title="${esc(g.t)}"></i>`).join('')}<span style="margin-left:8px">${s.lab}</span></div></div>`).join('')
+    :'<div class="empty">ไม่มีข้อมูลตามตัวกรอง</div>'; }
+function renderRights(rows){
+  const G=grpH(), k=S.measure;
+  const rts=Object.keys(RIGHTS).filter(rt=>rows.some(r=>r.rt===rt));
+  const st=G.map(h=>{ const rs=rows.filter(r=>r.h===h); const v=rts.map(rt=>sum(rs.filter(r=>r.rt===rt),k)); return {h,v,t:v.reduce((a,b)=>a+b,0)}; }).sort((a,b)=>b.t-a.t);
+  $('tRight').innerHTML=`<thead><tr><th>โรงพยาบาล (${MLABEL[k]})</th>${rts.map(rt=>`<th>${RIGHTS[rt]}</th><th>%</th>`).join('')}<th>รวม</th></tr></thead><tbody>`+
+    st.map(s=>`<tr class="${s.h===S.home?'home':''}"><td><span class="hn">${dot(s.h)}${esc(nm(s.h))}${s.h===S.home?'<span class="home-tag">รพ.เรา</span>':''}</span></td>${s.v.map(x=>`<td>${fmt(x)}</td><td class="muted">${s.t?(x/s.t*100).toFixed(1):'0.0'}%</td>`).join('')}<td><strong>${fmt(s.t)}</strong></td></tr>`).join('')+'</tbody>';
+  const pct=S.rtScale!=='abs', mx=pct?1:Math.max(1,...st.map(s=>s.t));
+  $('legRight').innerHTML=rts.map(rt=>`<span><i style="background:${RCOL[rt]||'var(--muted)'}"></i>${RIGHTS[rt]}</span>`).join('')+` <span class="muted">· ${MLABEL[k]}${pct?' · แท่งเต็ม = 100% ของยอด รพ. นั้น':''}</span>`;
+  $('rightChart').innerHTML=rankRows(st.map(s=>({h:s.h,segs:s.v.map((x,j)=>({v:pct?(s.t?x/s.t:0):x,c:RCOL[rts[j]]||'var(--muted)',t:`${RIGHTS[rts[j]]} ${fmt(x)} บาท (${s.t?(x/s.t*100).toFixed(1):0}%)`})),
+    lab:pct?mb(s.t)+(rts.length>1?' <span class="muted">· '+rts.map((rt,j)=>rt+' '+(s.t?(s.v[j]/s.t*100).toFixed(0):0)+'%').filter((_,j)=>s.v[j]>0).slice(0,2).join(' ')+'</span>':''):mb(s.t)})),mx);
+}
+
+function niceTicks(max){ if(max<=0) return [0,1]; const raw=max/4, p=Math.pow(10,Math.floor(Math.log10(raw))); const st=[1,2,2.5,5,10].map(x=>x*p).find(x=>x>=raw);
+  const t=[]; for(let v=0;v<=max+st*0.001;v+=st) t.push(v); if(t[t.length-1]<max) t.push(t[t.length-1]+st); return t; }
+function renderTrend(rows){
+  const k=S.measure, ser=pairSeries(), G=grpH();
+  const N=S.m1-S.m0+1, ML=FY_M.slice(S.m0,S.m1+1);
+  const series=codes=>{ let a=Array(12).fill(0); rows.forEach(r=>{ if(codes.includes(r.h)) a[r.fm]+=r[k]; }); a=a.map(v=>v/codes.length).slice(S.m0,S.m1+1);
+    if(S.cum==='c') for(let i=1;i<a.length;i++) a[i]+=a[i-1]; return a; };
+  const main=ser.map(s=>({...s,a:series(s.codes)}));
+  const others=G.filter(h=>!ser.some(s=>s.key===h)).map(h=>({h,a:series([h])}));
+  $('legTrend').innerHTML=legendHTML(main)+(others.length?`<span><i style="background:${C_GRP};opacity:.5"></i>รพ. อื่นในกลุ่ม (${others.length})</span>`:'');
+  const W=860,Ht=300,L=64,R=16,T=28,B=30, iw=W-L-R, ih=Ht-T-B;
+  const vals=[...main,...others].flatMap(s=>s.a);
+  const mx=Math.max(0,...vals), mn=Math.min(0,...vals);
+  const ticks=niceTicks(mx); const top=ticks[ticks.length-1]; const bot=mn<0?-niceTicks(-mn).slice(-1)[0]:0;
+  const y=v=>T+ih-(v-bot)/(top-bot||1)*ih, x=i=>L+iw*(i+0.5)/N;
+  const path=a=>a.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+','+y(v).toFixed(1)).join('');
+  let svg=`<svg viewBox="0 0 ${W} ${Ht}" role="img" aria-label="ยอดโอนรายเดือน">`;
+  ticks.forEach(t=>{ svg+=`<line x1="${L}" x2="${W-R}" y1="${y(t)}" y2="${y(t)}" stroke="var(--rule)" stroke-width="1"/><text x="${L-8}" y="${y(t)+4}" text-anchor="end">${(t/1e6).toLocaleString('th-TH',{maximumFractionDigits:1})}</text>`; });
+  if(bot<0) svg+=`<line x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}" stroke="var(--muted)" stroke-width="1"/>`;
+  svg+=`<text x="${L-8}" y="${T-14}" text-anchor="end" style="font-size:11px">ล้านบาท</text>`;
+  ML.forEach((m,i)=>svg+=`<text x="${x(i)}" y="${Ht-8}" text-anchor="middle">${m}</text>`);
+  others.forEach(o=>svg+=`<path d="${path(o.a)}" fill="none" stroke="${C_GRP}" stroke-opacity=".28" stroke-width="1.2"/>`);
+  svg+=`<line id="xh" x1="0" x2="0" y1="${T}" y2="${T+ih}" stroke="var(--muted)" stroke-dasharray="3 3" visibility="hidden"/>`;
+  main.slice().reverse().forEach(s=>{ svg+=`<path d="${path(s.a)}" fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linejoin="round"/>`;
+    s.a.forEach((v,i)=>svg+=`<circle cx="${x(i)}" cy="${y(v)}" r="${i===N-1?4.5:3}" fill="${s.color}" stroke="var(--surface)" stroke-width="2"/>`); });
+  for(let i=0;i<N;i++) svg+=`<rect class="hit" data-i="${i}" x="${L+iw*i/N}" y="${T}" width="${iw/N}" height="${ih}" fill="transparent"/>`;
+  svg+='</svg>';
+  $('trend').innerHTML=svg; TRENDX={ML,main,others};
+  $('trend').querySelectorAll('.hit').forEach(el=>{
+    el.addEventListener('mousemove',e=>{ const i=+el.dataset.i; const xh=$('xh'); xh.setAttribute('x1',x(i)); xh.setAttribute('x2',x(i)); xh.setAttribute('visibility','visible');
+      const rk=[...main.filter(s=>s.key!=='AVG').map(s=>({h:s.key,v:s.a[i]})),...others.map(o=>({h:o.h,v:o.a[i]}))].sort((a,b)=>b.v-a.v);
+      const myR=rk.findIndex(z=>z.h===S.home)+1;
+      showTip(e,`<strong>${ML[i]} · ${S.cum==='c'?'สะสม':'รายเดือน'}</strong>`+main.map(s=>`<div class="r"><span><i style="background:${s.color}"></i>${esc(s.label)}</span><span>${fmt(s.a[i])}</span></div>`).join('')+(myR?`<div class="r"><span>อันดับ รพ.เรา</span><span>${myR}/${rk.length}</span></div>`:'')); });
+    el.addEventListener('mouseleave',()=>{ $('xh').setAttribute('visibility','hidden'); hideTip(); });
+  });
+}
+
+function renderHold(rows){
+  const G=grpH();
+  const st=hstats(rows,G).filter(s=>s.delay||s.ded||s.off).sort((a,b)=>(b.delay+b.ded+b.off)-(a.delay+a.ded+a.off));
+  $('tHold').innerHTML=`<thead><tr><th>โรงพยาบาล</th><th>ยอดจัดสรร</th><th>ชะลอการโอน</th><th>% ชะลอ</th><th>หักจากยอดโอน</th><th>รอหักกลบ</th><th>กองทุนที่ชะลอ/หักมากสุด</th></tr></thead><tbody>`+
+    (st.length?st.map(s=>{ const rs=rows.filter(r=>r.h===s.h); const g=groupBy(rs,r=>r.fl);
+      const top=[...g.entries()].map(([f,x])=>[f,sum(x,'delay')+sum(x,'ded')]).sort((a,b)=>b[1]-a[1])[0];
+      return `<tr class="${s.h===S.home?'home':''}"><td><span class="hn">${dot(s.h)}${esc(nm(s.h))}${s.h===S.home?'<span class="home-tag">รพ.เรา</span>':''}</span></td><td>${fmt(s.amt)}</td><td>${s.delay?fmt(s.delay):'–'}</td><td class="muted">${s.amt?(s.delay/s.amt*100).toFixed(1)+'%':'–'}</td><td>${s.ded?fmt(s.ded):'–'}</td><td>${s.off?fmt(s.off):'–'}</td><td style="text-align:left">${top&&top[1]?esc(top[0])+' <span class="muted">('+mb(top[1])+')</span>':'–'}</td></tr>`; }).join('')
+      :`<tr><td colspan="7" class="empty">ไม่มียอดชะลอหรือหัก</td></tr>`)+'</tbody>';
+  $('legHold').innerHTML=`<span><i style="background:var(--s4)"></i>ชะลอการโอน</span><span><i style="background:var(--s8)"></i>หักจากยอดโอน</span><span><i style="background:var(--s7)"></i>รอหักกลบ</span> <span class="muted">· เรียงจากยอดรวมมากไปน้อย · % = ชะลอ+หัก ต่อยอดจัดสรร</span>`;
+  const mxH=Math.max(1,...st.map(s=>s.delay+s.ded+s.off));
+  $('holdChart').innerHTML=st.length?rankRows(st.map(s=>({h:s.h,segs:[{v:s.delay,c:'var(--s4)',t:'ชะลอ '+fmt(s.delay)},{v:s.ded,c:'var(--s8)',t:'หัก '+fmt(s.ded)},{v:s.off,c:'var(--s7)',t:'รอหักกลบ '+fmt(s.off)}],
+    lab:mb(s.delay+s.ded+s.off)+` <span class="muted">· ${s.amt?((s.delay+s.ded)/s.amt*100).toFixed(1):0}%</span>`})),mxH):'<div class="empty">ไม่มียอดชะลอหรือหัก</div>';
+}
+
+function txCodes(){ if(S.txH==='HOME') return [S.home]; if(S.txH==='PAIR') return [S.home,S.cmp]; if(S.txH==='GRP') return grpH(); return [S.txH]; }
+function txAll(rows=baseRows()){
+  const C=new Set(txCodes()); let rs=rows.filter(r=>C.has(r.h)); if(S.fund) rs=rs.filter(r=>r.fl===S.fund);
+  const q=S.q.trim().toLowerCase(); if(q) rs=rs.filter(r=>(r.per+' '+r.batch+' '+r.sub+' '+r.fund+' '+r.acct).toLowerCase().includes(q));
+  return rs.slice().sort((a,b)=>b.dk-a.dk||a.h.localeCompare(b.h)); }
+function renderTx(rows){
+  const rs=txAll(rows);
+  $('fundFilter').innerHTML=S.fund?`<button type="button" class="chip" id="clrFund" aria-pressed="true">กองทุน: ${esc(S.fund)} ✕</button>`:'';
+  const show=rs.slice(0,S.limit);
+  $('tTx').innerHTML=`<thead><tr><th>วันที่โอน</th><th style="text-align:left">โรงพยาบาล</th><th style="text-align:left">Batch</th><th style="text-align:left">งวด/เลขที่เบิกจ่าย</th><th style="text-align:left">กองทุน / กองทุนย่อย</th><th style="text-align:left">สิทธิ</th><th>จำนวนเงิน</th><th>ชะลอ</th><th>หัก</th><th>คงเหลือ</th><th>รอหักกลบ</th></tr></thead><tbody>`+
+    (show.length?show.map(r=>`<tr><td>${r.ds}</td><td style="text-align:left"><span class="hn" style="font-weight:500">${dot(r.h)}${esc(nm(r.h))}</span></td><td style="text-align:left">${esc(r.batch)}</td><td style="text-align:left">${esc(r.per)}</td><td class="wrap-t"><strong style="font-weight:600">${esc(r.fl)}</strong><br><span class="muted">${esc(r.sub)}</span></td><td style="text-align:left">${r.rt}</td><td>${fmt(r.amt)}</td><td>${r.delay?fmt(r.delay):'–'}</td><td>${r.ded?fmt(r.ded):'–'}</td><td><strong>${fmt(r.rem)}</strong></td><td>${r.off?fmt(r.off):'–'}</td></tr>`).join('')
+      :'<tr><td colspan="11" class="empty">ไม่พบรายการ</td></tr>')+'</tbody>';
+  $('tabCnt').textContent=`(${fmt0(rs.length)})`;
+  $('txCount').textContent=`แสดง ${fmt0(show.length)} จาก ${fmt0(rs.length)} รายการ`;
+  $('more').hidden=show.length>=rs.length;
+}
+
+function renderRecent(){
+  const rs=ROWS.filter(r=>r.h===S.home&&(S.rights.size===0||S.rights.has(r.rt)));
+  const g=groupBy(rs,r=>r.dk); const days=[...g.keys()].sort((a,b)=>b-a).slice(0,8);
+  $('tRecent').innerHTML=`<thead><tr><th>วันที่โอน</th><th>รายการ</th><th>ยอดจัดสรร</th><th>ชะลอ/หัก</th><th>โอนเข้าบัญชีสุทธิ</th><th style="text-align:left">กองทุนหลัก</th></tr></thead><tbody>`+
+    (days.length?days.map(d=>{ const x=g.get(d); const fg=groupBy(x,r=>r.fl); const top=[...fg.entries()].map(([f,y])=>[f,sum(y,'amt')]).sort((a,b)=>b[1]-a[1]).slice(0,2).filter(z=>z[1]>0).map(z=>esc(z[0])).join(', ');
+      return `<tr><td>${x[0].ds}</td><td>${x.length}</td><td>${fmt(sum(x,'amt'))}</td><td>${fmt(sum(x,'delay')+sum(x,'ded'))}</td><td><strong>${fmt(sum(x,'rem'))}</strong></td><td style="text-align:left">${top||'–'}</td></tr>`; }).join('')
+      :'<tr><td colspan="6" class="empty">ยังไม่มีรายการโอน</td></tr>')+'</tbody>';
+}
+function renderYoy(){
+  const k=S.measure, G=grpH(), prev=S.fy-1;
+  const inR=r=>r.fm>=S.m0&&r.fm<=S.m1&&(S.rights.size===0||S.rights.has(r.rt));
+  const cur=ROWS.filter(r=>r.fy===S.fy&&inR(r)), old=ROWS.filter(r=>r.fy===prev&&inR(r));
+  if(!old.length){ $('legYoy').innerHTML=''; $('yoyChart').innerHTML=''; $('yoyH').textContent='ปีนี้เทียบปีก่อน'; $('yoyNote').textContent=''; $('tYoy').innerHTML=`<tbody><tr><td class="empty">ไม่มีข้อมูลปีงบ ${prev} ให้เทียบ</td></tr></tbody>`; return; }
+  $('yoyH').textContent=`ปีงบ ${S.fy} เทียบ ${prev} (${FY_M[S.m0]}–${FY_M[S.m1]})`;
+  $('yoyNote').textContent=`${MLABEL[k]} · ${nm(S.home)} และกลุ่ม ${G.length} แห่ง`;
+  const Gs=new Set(G);
+  const agg=(rows,f)=>{ const m=new Map(); rows.forEach(r=>{ if(!f(r)) return; m.set(r.fl,(m.get(r.fl)||0)+r[k]); }); return m; };
+  const mc=agg(cur,r=>r.h===S.home), mo=agg(old,r=>r.h===S.home), gc=agg(cur,r=>Gs.has(r.h)), go=agg(old,r=>Gs.has(r.h));
+  const funds=[...new Set([...mc.keys(),...mo.keys()])].sort((a,b)=>(mc.get(b)||0)-(mc.get(a)||0));
+  const pct=(a,b)=>b?((a-b)/Math.abs(b)*100):null;
+  const pc=v=>v==null?'<span class="muted">–</span>':`<span class="${v<0?'chg-dn':'chg-up'}">${v>0?'▲ +':v<0?'▼ ':''}${v.toFixed(1)}%</span>`;
+  const T=(m)=>[...m.values()].reduce((a,b)=>a+b,0);
+  $('tYoy').innerHTML=`<thead><tr><th>กองทุน</th><th>รพ.เรา ปีงบ ${S.fy}</th><th>รพ.เรา ปีงบ ${prev}</th><th>ต่าง (บาท)</th><th>% เปลี่ยน รพ.เรา</th><th>% เปลี่ยน กลุ่ม</th></tr></thead><tbody>`+
+    funds.map(f=>{ const a=mc.get(f)||0,b=mo.get(f)||0; return `<tr><td><strong>${esc(f)}</strong></td><td>${fmt(a)}</td><td>${fmt(b)}</td><td>${sign(a-b,fmt)}</td><td>${pc(pct(a,b))}</td><td>${pc(pct(gc.get(f)||0,go.get(f)||0))}</td></tr>`; }).join('')+
+    `<tr><td><strong>รวม</strong></td><td><strong>${fmt(T(mc))}</strong></td><td><strong>${fmt(T(mo))}</strong></td><td>${sign(T(mc)-T(mo),fmt)}</td><td>${pc(pct(T(mc),T(mo)))}</td><td>${pc(pct(T(gc),T(go)))}</td></tr></tbody>`;
+  $('legYoy').innerHTML=`<span><i style="background:var(--s1)"></i>รพ.เรา ปีงบ ${S.fy}</span><span><i style="background:var(--s1);opacity:.35"></i>รพ.เรา ปีงบ ${prev}</span> <span class="muted">· ตัวเลขท้ายแท่ง = % เปลี่ยน รพ.เรา / กลุ่ม</span>`;
+  const mxY=Math.max(1,...funds.flatMap(f=>[mc.get(f)||0,mo.get(f)||0]));
+  const bl=(v,o)=>`<div class="rk-bar"><i style="width:calc(${Math.max(0,v)/mxY} * (100% - 120px));background:var(--s1);opacity:${o}"></i><span style="margin-left:8px">${mb(v)}</span></div>`;
+  $('yoyChart').innerHTML=funds.map(f=>{ const a=mc.get(f)||0,b=mo.get(f)||0;
+    return `<div class="yoy-row"><div class="fund-name">${esc(f)}<small>${pc(pct(a,b))} <span class="muted">รพ.เรา</span> · ${pc(pct(gc.get(f)||0,go.get(f)||0))} <span class="muted">กลุ่ม</span></small></div><div class="bars">${bl(a,1)}${bl(b,.35)}</div></div>`; }).join('');
+}
+function renderAppeal(rows){
+  const G=grpH(); const ap=rows.filter(r=>/อุทธรณ์/.test(r.per));
+  const st=G.map(h=>{ const x=ap.filter(r=>r.h===h); return {h,n:x.length,amt:sum(x,'amt'),ded:sum(x,'ded'),off:sum(x,'off'),rem:sum(x,'rem')}; }).filter(s=>s.n).sort((a,b)=>b.amt-a.amt);
+  $('tAppeal').innerHTML=`<thead><tr><th>โรงพยาบาล</th><th>รายการอุทธรณ์</th><th>ยอดได้เพิ่ม (จำนวนเงิน)</th><th>หักจากยอดโอน</th><th>รอหักกลบ</th><th>สุทธิ</th></tr></thead><tbody>`+
+    (st.length?st.map(s=>`<tr class="${s.h===S.home?'home':''}"><td><span class="hn">${dot(s.h)}${esc(nm(s.h))}${s.h===S.home?'<span class="home-tag">รพ.เรา</span>':''}</span></td><td>${fmt0(s.n)}</td><td>${fmt(s.amt)}</td><td>${s.ded?fmt(s.ded):'–'}</td><td>${s.off?fmt(s.off):'–'}</td><td><strong>${fmt(s.rem)}</strong></td></tr>`).join('')
+      :'<tr><td colspan="6" class="empty">ไม่มีรายการอุทธรณ์ในช่วงที่เลือก</td></tr>')+'</tbody>';
+  $('legAppeal').innerHTML=`<span><i style="background:var(--s1)"></i>รพ.เรา</span><span><i style="background:var(--s2)"></i>รพ. ที่เลือกเทียบ</span><span><i style="background:var(--muted)"></i>รพ. อื่น</span> <span class="muted">· ยอดได้เพิ่มจากอุทธรณ์ (จำนวนเงิน)</span>`;
+  const mxP=Math.max(1,...st.map(s=>s.amt));
+  $('appealChart').innerHTML=st.length?rankRows(st.map(s=>({h:s.h,segs:[{v:s.amt,c:hcolor(s.h),t:fmt(s.amt)+' บาท'}],lab:mb(s.amt)+` <span class="muted">· ${fmt0(s.n)} รายการ</span>`})),mxP):'<div class="empty">ไม่มีรายการอุทธรณ์ในช่วงที่เลือก</div>';
+}
+function sign(v,f){ const s=f(Math.abs(v)); if(s===f(0)) return s; return (v>0?'▲ +':'▼ −')+s; }
+function render(){
+  if(!ROWS.length) return;
+  buildControls(); const rows=baseRows();
+  $('mastSub').textContent=`ปีงบประมาณ ${S.fy}${S.m0||S.m1<11?` (${FY_M[S.m0]} – ${FY_M[S.m1]})`:''} · ${allCodes().length} หน่วยบริการในจังหวัดบุรีรัมย์ · แยกตามสิทธิและกองทุน เทียบ ${nm(S.home)} กับ รพ. อื่น`;
+  renderHome(rows); renderRecent(); renderHosp(rows); renderYoy(); renderFunds(rows); renderHeat(rows); renderRights(rows); renderTrend(rows); renderHold(rows); renderAppeal(rows); renderTx(rows);
+}
+
+/* ---------- tooltip ---------- */
+const tip=$('tip');
+function showTip(e,html){ tip.innerHTML=html; tip.hidden=false; const w=tip.offsetWidth,h=tip.offsetHeight;
+  let x=e.clientX+14,y=e.clientY+14; if(x+w>innerWidth-8) x=e.clientX-w-14; if(y+h>innerHeight-8) y=e.clientY-h-14; tip.style.left=x+'px'; tip.style.top=y+'px'; }
+function hideTip(){ tip.hidden=true; }
+$('fundBars').addEventListener('mousemove',e=>{ const b=e.target.closest('.bar-line'); if(!b) return hideTip();
+  const [h,f,v,p]=b.dataset.tip.split('|'); showTip(e,`<strong>${h}</strong><div>${f}</div><div class="r"><span>${MLABEL[S.measure]}</span><span>${v}</span></div><div class="r"><span>สัดส่วนของยอด รพ.</span><span>${p}%</span></div>`); });
+$('fundBars').addEventListener('mouseleave',hideTip);
+
+
+/* ---------- export: PNG chart + Excel (table + chart image) ---------- */
+let TRENDX=null;
+const SRC_URL='https://smt.nhso.go.th/smtf/#/home/budget/summary';
+function srcShort(){ return `ที่มา: สปสช. ระบบ Smart Money Transfer (SMT) · รายงานการโอนเงินงบกองทุน แยกตามหน่วยบริการ · ข้อมูล ณ ${META&&META.fetched?fmtFetched(META.fetched):'–'}`; }
+function srcNotes(){ document.querySelectorAll('#pg-ov section, #pg-tx section').forEach(sec=>{ let n=sec.querySelector(':scope > .src-note');
+  if(!n){ n=document.createElement('p'); n.className='note src-note'; sec.appendChild(n); }
+  n.innerHTML=`${esc(srcShort())} · <a href="${SRC_URL}" target="_blank" rel="noopener">smt.nhso.go.th</a>`; }); }
+
+const XP_SKIP=new Set(['s-heat']);
+function xpToast(t,ms){ let el=$('xpMsg'); if(!el){ el=document.createElement('div'); el.id='xpMsg'; el.setAttribute('role','status'); document.body.appendChild(el); }
+  el.textContent=t; el.style.display='block'; clearTimeout(el._t); if(ms) el._t=setTimeout(()=>el.style.display='none',ms); }
+function secTitle(sec){ const h=sec.querySelector('.sec-h h2'); return (h?h.textContent:sec.id).trim(); }
+function stamp(){ return `ปีงบ${S.fy}_${FY_M[S.m0]}-${FY_M[S.m1]}`.replace(/[.\s]/g,''); }
+function numify(t){ const x=t.replace(/[,\s฿]/g,'').replace(/^[▲▼]\+?−?/,m=>m.includes('▼')||m.includes('−')?'-':'').replace(/%$/,''); return /^-?\d+(\.\d+)?$/.test(x)?+x:t.trim(); }
+function secTables(sec){ // [[title,rows]]
+  const out=[];
+  if(sec.id==='s-trend'&&TRENDX){ const {ML,main,others}=TRENDX;
+    const cols=[...main.map(m=>({l:m.label,a:m.a})),...others.map(o=>({l:nm(o.h),a:o.a}))];
+    out.push(['ยอดรายเดือน',[['เดือน',...cols.map(c=>c.l)],...ML.map((m,i)=>[m,...cols.map(c=>Math.round(c.a[i]*100)/100)])]]); }
+  if(sec.id==='s-tx'){ const rs=txAll();
+    out.push(['รายการโอน',[['วันที่โอน','รหัส รพ.','โรงพยาบาล','Batch','งวด/เลขที่เบิกจ่าย','กองทุน','กองทุนย่อย','สิทธิ','จำนวนเงิน','ชะลอ','หัก','คงเหลือ','รอหักกลบ'],
+      ...rs.map(r=>[r.ds,r.h,nm(r.h),r.batch,r.per,r.fl,r.sub,r.rt,r.amt,r.delay,r.ded,r.rem,r.off])]]); return out; }
+  sec.querySelectorAll('table').forEach(t=>{ if(!t.rows.length) return;
+    const rows=[...t.rows].map(r=>[...r.cells].flatMap(c=>{ const v=numify(c.innerText||c.textContent||''); return Array(c.colSpan||1).fill('').map((_,i)=>i?'':v); }));
+    const keep=rows[0].map((_,ci)=>rows.slice(1).some(r=>r[ci]!==''&&r[ci]!=null)||rows.length===1);
+    out.push([t.id,rows.map(r=>r.filter((_,ci)=>keep[ci]))]); });
+  return out;
+}
+function chartNode(sec){ return sec.querySelector('#homeChart,#rankChart,#fundBars,#rightChart,#trend,#holdChart,#yoyChart,#appealChart,#tHeat')?.closest('.panel'); }
+async function snap(node,sec){
+  if(!window.htmlToImage) throw new Error('ไม่สามารถโหลดตัวสร้างรูป');
+  const bg=getComputedStyle(document.body).backgroundColor;
+  const cap=document.createElement('div'); cap.style.cssText='margin:0 0 12px;font-family:var(--f-display);';
+  cap.innerHTML=`<div style="font-size:18px;font-weight:600">${esc(secTitle(sec))}</div><div style="font-size:12.5px;color:var(--muted)">${esc(nm(S.home))} · ${esc(MLABEL[S.measure])} · ปีงบ ${S.fy} (${FY_M[S.m0]}–${FY_M[S.m1]}) · Design by Moveon</div>`;
+  const foot=document.createElement('div'); foot.style.cssText='margin-top:12px;font-size:12px;color:var(--muted)';
+  foot.textContent=srcShort()+' · smt.nhso.go.th';
+  node.prepend(cap); node.append(foot);
+  try{ return await htmlToImage.toPng(node,{pixelRatio:2,backgroundColor:bg,skipFonts:true,cacheBust:false,filter:n=>!(n.classList&&n.classList.contains('xp'))}); }
+  finally{ cap.remove(); foot.remove(); }
+}
+function dataURLtoBytes(u){ const b=atob(u.split(',')[1]); const a=new Uint8Array(b.length); for(let i=0;i<b.length;i++) a[i]=b.charCodeAt(i); return a; }
+async function saveFile(filename,data){
+  let dl=null; try{ dl=window.claude&&await claude.use('downloads'); }catch(e){}
+  if(dl){ try{ await dl.save({filename,data}); xpToast('บันทึกไฟล์แล้ว',2500); return; }
+    catch(e){ if(e&&e.code==='declined'){ xpToast('ยกเลิกการบันทึก',2000); return; } if(e&&e.code==='rate_limited'){ xpToast('มีหน้าต่างบันทึกเปิดอยู่แล้ว',2500); return; } } }
+  const blob=data instanceof Blob?data:new Blob([data]); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); xpToast('ดาวน์โหลดแล้ว',2000);
+}
+async function addSheet(wb,sec,used){
+  let name=secTitle(sec).replace(/[\\\/\?\*\[\]:]/g,' ').slice(0,28)||sec.id; let n=name,i=2; while(used.has(n)) n=name.slice(0,26)+' '+(i++); used.add(n);
+  const ws=wb.addWorksheet(n); let r=1;
+  ws.getCell(r,1).value=secTitle(sec); ws.getCell(r,1).font={bold:true,size:14}; r++;
+  ws.getCell(r,1).value=`${nm(S.home)} · ${MLABEL[S.measure]} · ปีงบ ${S.fy} (${FY_M[S.m0]}–${FY_M[S.m1]}) · Design by Moveon · Orapat Viriyaudomsiri`; ws.getCell(r,1).font={color:{argb:'FF666666'},size:10}; r++;
+  ws.getCell(r,1).value=srcShort(); ws.getCell(r,1).font={color:{argb:'FF666666'},size:10}; r++;
+  ws.getCell(r,1).value={text:SRC_URL,hyperlink:SRC_URL}; ws.getCell(r,1).font={color:{argb:'FF2A78D6'},underline:true,size:10}; r+=2;
+  const node=chartNode(sec);
+  if(node){ try{ const url=await snap(node,sec); const img=wb.addImage({base64:url,extension:'png'});
+      const W=node.offsetWidth, H=node.offsetHeight, w=Math.min(900,W), h=Math.round(H*w/W);
+      ws.addImage(img,{tl:{col:0,row:r-1},ext:{width:w,height:h}}); r+=Math.ceil(h/20)+2; }catch(e){ ws.getCell(r,1).value='(สร้างภาพกราฟไม่สำเร็จ)'; r+=2; } }
+  for(const [t,rows] of secTables(sec)){
+    rows.forEach((row,ri)=>{ row.forEach((v,ci)=>{ const c=ws.getCell(r,ci+1); c.value=v===''?null:v;
+      if(typeof v==='number') c.numFmt=Number.isInteger(v)&&Math.abs(v)<1e5?'#,##0':'#,##0.00';
+      if(ri===0){ c.font={bold:true,color:{argb:'FF0F3B30'}}; c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFA8E6CF'}}; c.alignment={wrapText:true,vertical:'middle'}; } }); r++; });
+    r+=2; }
+  ws.getCell(r,1).value=srcShort()+' · '+SRC_URL; ws.getCell(r,1).font={italic:true,color:{argb:'FF666666'},size:10};
+  ws.columns.forEach((c,i)=>{ c.width=i===0?34:i===1?28:16; });
+}
+async function xpExcel(secs,fname){
+  if(!window.ExcelJS){ xpToast('โหลดตัวสร้าง Excel ไม่สำเร็จ ลองรีเฟรช',3000); return; }
+  xpToast('กำลังสร้างไฟล์ Excel…');
+  const wb=new ExcelJS.Workbook(); wb.creator='Design by Moveon · Orapat Viriyaudomsiri'; const used=new Set();
+  for(const sec of secs) await addSheet(wb,sec,used);
+  const buf=await wb.xlsx.writeBuffer(); await saveFile(fname,new Blob([buf]));
+}
+async function xpPng(sec){ const node=chartNode(sec); if(!node) return; xpToast('กำลังสร้างรูป…');
+  try{ const url=await snap(node,sec); await saveFile(`${secTitle(sec)}_${nm(S.home)}_${stamp()}.png`.replace(/[\\\/:*?"<>|]/g,' '),new Blob([dataURLtoBytes(url)])); }
+  catch(e){ xpToast('สร้างรูปไม่สำเร็จ: '+(e.message||e),4000); } }
+function initExport(){
+  document.querySelectorAll('#pg-ov section, #pg-tx section').forEach(sec=>{ const h=sec.querySelector('.sec-h'); if(!h||h.querySelector('.xp')) return;
+    const box=document.createElement('div'); box.className='xp';
+    if(chartNode(sec)) box.innerHTML+=`<button type="button" data-xp="png" title="บันทึกกราฟเป็นรูป PNG">⬇ รูปกราฟ</button>`;
+    box.innerHTML+=`<button type="button" data-xp="xlsx" title="ส่งออก Excel (ตาราง + ภาพกราฟ)">⬇ Excel</button>`;
+    h.appendChild(box);
+    box.addEventListener('click',async e=>{ const b=e.target.closest('[data-xp]'); if(!b) return; box.classList.add('xp-busy');
+      try{ if(b.dataset.xp==='png') await xpPng(sec); else await xpExcel([sec],`${secTitle(sec)}_${nm(S.home)}_${stamp()}.xlsx`.replace(/[\\\/:*?"<>|]/g,' ')); }
+      catch(err){ xpToast('ส่งออกไม่สำเร็จ: '+(err.message||err),4000); } box.classList.remove('xp-busy'); }); });
+  $('xpAll').addEventListener('click',async e=>{ const b=e.currentTarget; b.classList.add('xp-busy');
+    try{ if($('pg-ov').hidden) showTab('ov'); await new Promise(r=>setTimeout(r,60));
+      const secs=[...document.querySelectorAll('#pg-ov section')].filter(s=>!s.hidden&&s.querySelector('.sec-h'));
+      await xpExcel(secs,`เงินโอน สปสช_${nm(S.home)}_${stamp()}.xlsx`); }
+    catch(err){ xpToast('ส่งออกไม่สำเร็จ: '+(err.message||err),4000); } b.classList.remove('xp-busy'); });
+}
+/* ---------- events ---------- */
+initExport();
+$('m0').addEventListener('change',e=>{ S.m0=+e.target.value; if(S.m1<S.m0) S.m1=S.m0; S.limit=50; render(); });
+$('m1').addEventListener('change',e=>{ S.m1=+e.target.value; if(S.m0>S.m1) S.m0=S.m1; S.limit=50; render(); });
+$('fy').addEventListener('change',e=>{ S.fy=+e.target.value; S.m0=0; S.m1=11; S.rights.clear(); S.fund=null; S.limit=50; render(); });
+function seg(id,key){ $(id).addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; S[key]=b.dataset.v;
+  $(id).querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b)); render(); }); }
+$('measure').addEventListener('change',e=>{ S.measure=e.target.value; render(); });
+seg('scale','scale'); seg('cum','cum'); seg('homeScale','homeScale'); seg('rtScale','rtScale');
+document.addEventListener('click',e=>{ const rm=e.target.closest('[data-rm]'); if(rm){ setMulti(multi().filter(h=>h!==rm.dataset.rm)); render(); return; }
+  if(e.target.closest('#sizeBtn')){ setMulti(sizePeers(4)); render(); } });
+document.addEventListener('change',e=>{ if(e.target.id==='addMulti'&&e.target.value){ setMulti([...multi(),e.target.value]); render(); } });
+$('rights').addEventListener('click',e=>{ const b=e.target.closest('[data-r]'); if(!b) return; const k=b.dataset.r;
+  if(k==='ALL') S.rights.clear(); else if(S.rights.has(k)) S.rights.delete(k); else S.rights.add(k);
+  S.limit=50; render(); });
+$('cmp').addEventListener('change',e=>{ S.cmp=e.target.value; if(S.preset==='pair') applyPreset('pair'); render(); });
+$('home').addEventListener('change',e=>{ S.home=e.target.value; lsSet(LS_HOME,S.home); if(S.cmp===S.home) S.cmp='SIZE'; if(multi().includes(S.home)||!lsGet(LS_MULTI)) setMulti(sizePeers(4)); render(); });
+$('hosps').addEventListener('click',e=>{ const b=e.target.closest('[data-h]'); if(!b||b.dataset.h===S.home) return; HOSP[b.dataset.h].on=!HOSP[b.dataset.h].on; S.preset='custom';
+  lsSet(LS_GRP,JSON.stringify(allCodes().filter(h=>HOSP[h].on))); render(); });
+document.querySelector('.grp-tools').addEventListener('click',e=>{ const b=e.target.closest('[data-preset]'); if(!b) return; applyPreset(b.dataset.preset); render(); });
+$('fundBars').addEventListener('click',e=>{ const r=e.target.closest('.fund-row'); if(!r) return; S.fund=S.fund===r.dataset.f?null:r.dataset.f; S.limit=50; render(); });
+$('fundBars').addEventListener('keydown',e=>{ if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('fund-row')){ e.preventDefault(); e.target.click(); } });
+$('fundFilter').addEventListener('click',e=>{ if(e.target.closest('#clrFund')){ S.fund=null; render(); } });
+$('txH').addEventListener('change',e=>{ S.txH=e.target.value; S.limit=50; renderTx(baseRows()); });
+$('q').addEventListener('input',e=>{ S.q=e.target.value; S.limit=50; renderTx(baseRows()); });
+$('more').addEventListener('click',()=>{ S.limit+=200; renderTx(baseRows()); });
+
+async function handleFiles(files){
+  const msg=$('msg'); msg.className='note'; msg.textContent='กำลังอ่านไฟล์…';
+  if(!window.XLSX){ msg.className='note err'; msg.textContent='โหลดตัวอ่านไฟล์ Excel ไม่สำเร็จ ลองรีเฟรชหน้าอีกครั้ง'; return; }
+  const ok=[],bad=[];
+  for(const f of files){
+    try{ const buf=await f.arrayBuffer(); const wb=XLSX.read(buf,{type:'array',cellDates:true});
+      const aoa=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:''});
+      const p=parseAOA(aoa); if(!p.rows.length) throw new Error('ไม่มีรายการโอนในไฟล์');
+      const {fys,mk}=addParsed(p);
+      uploads.forEach(u=>{ if(u.code===p.code) u.rows=u.rows.filter(r=>!mk.has(r.fy*100+r.fm)); }); uploads=uploads.filter(u=>u.rows.length); uploads.push(p);
+      HOSP[p.code].on=true; S.fy=Math.max(...fys); S.m0=0; S.m1=11;
+      ok.push(`${p.name} (${p.rows.length} รายการ)`);
+    }catch(err){ bad.push(`${f.name}: ${err.message}`); }
+  }
+  const saved=saveUploads(uploads);
+  msg.className='note '+(bad.length?'err':'ok');
+  msg.textContent=(ok.length?'เพิ่มแล้ว: '+ok.join(' · '):'')+(bad.length?(ok.length?' | ':'')+'อ่านไม่ได้: '+bad.join(' · '):'')+(ok.length&&!saved?' (เบราว์เซอร์นี้เก็บไฟล์ไว้ไม่ได้)':'');
+  S.rights.clear(); render();
+}
+$('file').addEventListener('change',e=>{ if(e.target.files.length) handleFiles([...e.target.files]); e.target.value=''; });
+const drop=$('drop');
+['dragenter','dragover'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add('over');}));
+['dragleave','drop'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove('over');}));
+drop.addEventListener('drop',e=>{ const fs=[...e.dataTransfer.files].filter(f=>/\.xlsx?$/i.test(f.name)); if(fs.length) handleFiles(fs); });
+$('reset').addEventListener('click',()=>{ uploads=[]; saveUploads(uploads); loadBase(); restoreGroup(); S.fund=null; S.rights.clear();
+  $('msg').className='note'; $('msg').textContent='ล้างไฟล์ที่เพิ่มแล้ว'; render(); });
+
+function showTab(tab){ $('pg-ov').hidden=tab!=='ov'; $('pg-tx').hidden=tab!=='tx';
+  document.querySelectorAll('.tabs [data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===tab));
+  try{ history.replaceState(null,'',tab==='tx'?'#tx':'#overview'); }catch(e){} }
+document.querySelector('.tabs').addEventListener('click',e=>{ const b=e.target.closest('[data-tab]'); if(b) showTab(b.dataset.tab); });
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-go]'); if(b){ showTab(b.dataset.go); window.scrollTo(0,$('grpBox').offsetTop); } });
+
+function restoreGroup(){ let g=null; try{ g=JSON.parse(lsGet(LS_GRP)||'null'); }catch(e){}
+  if(Array.isArray(g)&&g.length){ S.preset='custom'; allCodes().forEach(h=>HOSP[h].on=g.includes(h)); } else applyPreset('community'); }
+function fmtFetched(iso){ try{ const d=new Date(iso); return d.toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Bangkok'}); }catch(e){ return iso; } }
+
+(async function init(){
+  S.home=lsGet(LS_HOME)||'10909';
+  try{
+    const res=await fetch('data.json',{cache:'no-store'}); if(!res.ok) throw new Error('HTTP '+res.status);
+    const d=await res.json(); META=d;
+    BASE={rows:parseSMT(d),hosp:d.hosp};
+    $('updated').innerHTML=`<span class="live"></span>ที่มาข้อมูล: สปสช. ระบบ Smart Money Transfer (<a href="${SRC_URL}" target="_blank" rel="noopener" style="color:inherit">smt.nhso.go.th</a>) · ข้อมูล ณ <b>${esc(fmtFetched(d.fetched))}</b> · อัปเดตอัตโนมัติ`;
+  }catch(e){
+    $('mastSub').textContent='โหลดข้อมูลไม่สำเร็จ ('+e.message+') ลองรีเฟรชหน้าอีกครั้ง หรือเพิ่มไฟล์ Excel ด้านล่าง';
+  }
+  loadBase(); uploads.forEach(p=>{ try{ addParsed(p);}catch(e){} });
+  restoreGroup();
+  render(); srcNotes();
+  showTab(location.hash==='#tx'?'tx':'ov');
+})();
+</script>
+
+</body></html>

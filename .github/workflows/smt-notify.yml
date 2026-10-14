@@ -1,0 +1,56 @@
+name: แจ้งเตือนเงินโอน สปสช. (MOPH Notify)
+
+# Checks SMT for new transfers to HC10909 every 30 minutes and posts them to the LINE group "Planfin HC10909".
+# Needs repository secrets MOPH_NOTIFY_CLIENT_KEY and MOPH_NOTIFY_SECRET_KEY (Settings → Secrets and variables → Actions).
+# Scheduled runs only happen on the default branch.
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "check = ตรวจและแจ้งเตือน, test = ส่งข้อความทดสอบ, dry-run = ดูข้อความโดยไม่ส่ง, seed = จำรายการปัจจุบันโดยไม่แจ้ง"
+        type: choice
+        options: [check, test, dry-run, seed]
+        default: check
+
+permissions:
+  contents: write
+
+concurrency:
+  group: smt-notify
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check SMT and notify
+        env:
+          MOPH_NOTIFY_CLIENT_KEY: ${{ secrets.MOPH_NOTIFY_CLIENT_KEY }}
+          MOPH_NOTIFY_SECRET_KEY: ${{ secrets.MOPH_NOTIFY_SECRET_KEY }}
+          DASHBOARD_URL: ${{ vars.DASHBOARD_URL }}
+          HCODE: "10909"
+          MODE: ${{ inputs.mode || 'check' }}
+        run: |
+          case "$MODE" in
+            test)    node scripts/smt-notify.mjs --test ;;
+            dry-run) node scripts/smt-notify.mjs --dry-run ;;
+            seed)    node scripts/smt-notify.mjs --seed ;;
+            *)       node scripts/smt-notify.mjs ;;
+          esac
+      - name: Save notify state
+        run: |
+          git add public/notify/state.json 2>/dev/null || true
+          if git diff --cached --quiet; then echo "no state change"; exit 0; fi
+          git config user.name "planfin-bot"
+          git config user.email "planfin-bot@users.noreply.github.com"
+          git commit -m "notify: update SMT state for HC10909"
+          for i in 1 2 3; do git pull --rebase && git push && exit 0; sleep $((i*5)); done
+          exit 1

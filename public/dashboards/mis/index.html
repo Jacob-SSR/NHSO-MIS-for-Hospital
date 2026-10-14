@@ -1,0 +1,620 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>ผลงานบริการ MIS บุรีรัมย์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&family=Sarabun:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+<style>
+/* Layout: dark-teal masthead band (from the hospital deck), one filter row, then stacked comparison sections — summary first, transactions last */
+:root{
+  --paper:#F7F5EF; --surface:#FFFFFF; --tint:#F1EEE6; --ink:#16302F; --muted:#5B6866; --rule:#D8D2C4;
+  --accent:#C8321E; --band:#14613E; --band-fg:#F4F8F2; --band-muted:#C4E3CF; --track:#ECE8DE;
+  --good:#1f7a4d; --warn:#a15c00; --head:#17784A;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#6250d6; --s8:#e34948;
+  --f-display:"Prompt","Sarabun","Leelawadee UI",Tahoma,sans-serif;
+  --f-body:"Prompt","Sarabun","Leelawadee UI",Tahoma,system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0E1918; --surface:#142322; --tint:#1A2C2B; --ink:#ECE8DE; --muted:#A3B0AE; --rule:#2D3F3D;
+  --accent:#E35A43; --band:#0F3D27; --band-fg:#F1EEE6; --band-muted:#A9D3B8; --track:#223533;
+  --good:#4cc08a; --warn:#e0a040; --head:#5CCB93;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+  color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --paper:#0E1918; --surface:#142322; --tint:#1A2C2B; --ink:#ECE8DE; --muted:#A3B0AE; --rule:#2D3F3D;
+  --accent:#E35A43; --band:#0F3D27; --band-fg:#F1EEE6; --band-muted:#A9D3B8; --track:#223533;
+  --good:#4cc08a; --warn:#e0a040; --head:#5CCB93;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+  color-scheme:dark; }
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px}
+header.mast{background:var(--band);color:var(--band-fg);padding-block:28px 26px}
+.eyebrow{display:inline-block;background:var(--accent);color:#fff;font-family:var(--f-display);font-weight:500;font-size:12.5px;letter-spacing:.04em;padding:3px 10px;border-radius:3px}
+h1{font-family:var(--f-display);font-weight:600;font-size:clamp(26px,4vw,38px);line-height:1.2;margin:12px 0 6px;text-wrap:balance}
+.mast p{margin:0;color:var(--band-muted);max-width:70ch}
+.toolbar{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:flex-end;padding-block:16px;border-bottom:1px solid var(--rule)}
+.ctl{display:flex;flex-direction:column;gap:5px;min-width:0}
+.ctl>span{font-size:12px;color:var(--muted);letter-spacing:.03em}
+select,input[type=search]{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:6px 10px}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:6px;overflow:hidden;background:var(--surface)}
+.seg button{font:inherit;font-size:14px;border:0;background:transparent;color:var(--ink);padding:6px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:14px;display:inline-flex;align-items:center;gap:7px;border:1px solid var(--rule);background:var(--surface);color:var(--ink);border-radius:999px;padding:4px 12px 4px 9px;cursor:pointer}
+.chip[aria-pressed=false]{opacity:.45}
+.chip.chk{opacity:1}
+.chip.chk b{width:15px;height:15px;border:1.5px solid var(--muted);border-radius:3px;display:inline-grid;place-items:center;font-size:11px;line-height:1;font-weight:700}
+.chip.chk[aria-pressed=true]{border-color:var(--ink);background:var(--tint)}
+.chip.chk[aria-pressed=true] b{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.chip:disabled{opacity:.35;cursor:not-allowed}
+.chip i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.btn{font:inherit;font-size:14px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:6px;padding:6px 14px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+button:focus-visible,select:focus-visible,input:focus-visible,.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.note{font-size:13px;color:var(--muted)}
+#msg{min-height:1.2em}
+#msg.ok{color:var(--good)} #msg.err{color:var(--accent)}
+section{padding-block:30px 6px}
+.sec-h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:10px 20px;margin-bottom:14px}
+.sec-h .k{font-family:var(--f-display);font-size:12.5px;color:var(--head);opacity:.85;letter-spacing:.05em}
+h2{font-family:var(--f-display);font-weight:600;font-size:22px;color:var(--head);margin:2px 0 0;line-height:1.25;text-wrap:balance}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:18px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--rule)}
+th:first-child,td:first-child{text-align:left}
+thead th{background:var(--band);color:var(--band-fg);font-weight:500;font-size:13px;position:sticky;top:0}
+tbody tr:nth-child(even) td{background:var(--tint)}
+td.wrap-t{white-space:normal;min-width:180px;text-align:left}
+.hn{display:inline-flex;align-items:center;gap:8px;font-weight:600}
+.hn i{width:10px;height:10px;border-radius:50%;flex:none}
+.cellbar{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.cellbar b{display:block;height:6px;border-radius:0 3px 3px 0;background:var(--muted);opacity:.55}
+.pill{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;border:1px solid currentColor}
+.pill.warn{color:var(--warn)} .pill.good{color:var(--good)}
+.muted{color:var(--muted)}
+/* fund bars */
+.fund-row{display:grid;grid-template-columns:minmax(150px,240px) 1fr;gap:6px 16px;padding-block:9px;border-bottom:1px solid var(--rule);cursor:pointer}
+.fund-row:hover,.fund-row.sel{background:var(--tint)}
+.fund-row.sel{box-shadow:inset 3px 0 0 var(--accent)}
+.fund-name{font-weight:600;font-size:14px;line-height:1.35;padding-left:8px;min-width:0}
+.fund-name small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.bars{display:flex;flex-direction:column;gap:3px;min-width:0}
+.bar-line{display:flex;align-items:center;gap:8px;min-width:0}
+.bar{height:11px;border-radius:0 4px 4px 0;min-width:2px;flex:none}
+.bar-line span{font-size:12.5px;color:var(--ink);white-space:nowrap}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:50%}
+.grid2{display:grid;grid-template-columns:1fr;gap:18px}
+@media (min-width:900px){.grid2{grid-template-columns:3fr 2fr}}
+.grid2>*{min-width:0}
+#trend svg{width:100%;height:auto;display:block}
+#trend text{fill:var(--muted);font-size:12px;font-family:var(--f-body)}
+.tip{position:fixed;pointer-events:none;z-index:20;background:var(--surface);color:var(--ink);border:1px solid var(--rule);border-radius:6px;padding:8px 10px;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.15);max-width:300px}
+.tip .r{display:flex;justify-content:space-between;gap:14px}
+.tip .r i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+.tabs{display:flex;gap:4px;margin-top:22px;border-bottom:2px solid var(--ink);overflow-x:auto}
+.tabs button{font:inherit;font-family:var(--f-display);font-weight:500;font-size:15px;border:1px solid var(--rule);border-bottom:0;background:var(--surface);color:var(--muted);padding:9px 16px;border-radius:6px 6px 0 0;cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tabs .cnt{font-family:var(--f-body);font-size:12.5px;opacity:.8}
+.linkbtn{font:inherit;font-size:13.5px;background:none;border:0;color:var(--accent);cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px}
+.empty{padding:24px;text-align:center;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+.tile{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:14px 16px;min-width:0}
+.tile .l{font-size:12.5px;color:var(--muted)}
+.tile .v{font-family:var(--f-display);font-weight:600;font-size:24px;line-height:1.3}
+.tile .c{font-size:13px;color:var(--muted)}
+.home-tag{display:inline-block;font-size:11.5px;font-weight:500;background:var(--accent);color:#fff;border-radius:3px;padding:0 6px;margin-left:6px;vertical-align:1px}
+tr.home td{box-shadow:inset 0 1px 0 var(--accent),inset 0 -1px 0 var(--accent)}
+tr.home td:first-child{box-shadow:inset 3px 0 0 var(--accent),inset 0 1px 0 var(--accent),inset 0 -1px 0 var(--accent)}
+.up{color:var(--ink)} .dn{color:var(--accent)}
+.rank{display:inline-block;min-width:44px;text-align:center;font-size:12.5px;border:1px solid var(--rule);border-radius:999px;padding:0 8px}
+.rank.top{border-color:var(--ink);font-weight:600}
+footer{padding-block:30px 40px;color:var(--muted);font-size:13px}
+.drop{border:1.5px dashed var(--rule);border-radius:8px;padding:10px 14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.drop.over{border-color:var(--accent);background:var(--tint)}
+@media (max-width:640px){
+  .fund-row{grid-template-columns:1fr}
+  .wrap{padding-inline:16px}
+}
+@media (prefers-reduced-motion:no-preference){.bar{transition:width .35s ease}}
+h3,.sub-h{color:var(--head)}
+body{font-weight:400;font-size:14.5px}
+</style>
+
+<style>
+.rep-tabs{display:flex;flex-wrap:wrap;gap:6px}
+.rep-tabs button{font:inherit;font-size:14px;border:1px solid var(--rule);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer}
+.rep-tabs button[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.sub-h{font-family:var(--f-display);font-weight:500;font-size:16px;margin:20px 0 8px}
+.chg-up{color:var(--good)} .chg-dn{color:var(--accent)}
+.updated{display:inline-flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--band-muted)}
+.updated b{color:var(--band-fg);font-weight:500}
+.live{width:8px;height:8px;border-radius:50%;background:#4cc08a;display:inline-block}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+.ov td:first-child{white-space:normal;min-width:170px}
+.rk-row{display:grid;grid-template-columns:28px minmax(120px,190px) 1fr;gap:4px 12px;align-items:center;padding-block:5px;border-bottom:1px solid var(--rule)}
+.rk-row.me{background:var(--tint)}
+.rk-name{font-size:13.5px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rk-bar{display:flex;align-items:center;min-width:0;width:100%}
+.rk-bar>i{display:block;height:16px;flex:none}
+.rk-bar>i+i{margin-left:1px}
+.rk-bar>i:nth-last-of-type(1){border-radius:0 4px 4px 0}
+.rk-bar span{font-size:12.5px;white-space:nowrap}
+.cmp-row{display:grid;grid-template-columns:minmax(140px,240px) 1fr;gap:4px 12px;align-items:center;padding-block:6px;border-bottom:1px solid var(--rule)}
+.cmp-row .nm{font-size:13.5px;font-weight:600}.cmp-row .nm small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.cmp-row .bars{display:flex;flex-direction:column;gap:3px;min-width:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+details.fold{margin-top:12px;border:1px solid var(--rule);border-radius:10px;background:var(--surface);padding:10px 14px}
+details.fold summary{cursor:pointer;font-weight:600;font-size:14px}
+.xp{display:inline-flex;gap:6px;margin-left:auto}
+.xp button,.xp-all{font:inherit;font-size:12.5px;padding:4px 10px;border:1px solid var(--rule);background:var(--surface);color:var(--ink);border-radius:6px;cursor:pointer}
+.xp button:hover,.xp-all:hover{border-color:var(--ink)}
+.xp-busy{opacity:.5;pointer-events:none}
+.src-note{margin:8px 0 0;font-size:12px}.src-note a{color:inherit}
+#xpMsg{position:fixed;right:16px;bottom:16px;background:var(--ink);color:var(--paper);padding:8px 14px;border-radius:8px;font-size:13px;z-index:50;display:none}
+@media (max-width:640px){.rk-row{grid-template-columns:24px 1fr}.rk-bar{grid-column:1 / -1}.cmp-row{grid-template-columns:1fr}}
+.cmp-bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-6px 0 18px}
+.chip.sm{font-size:13px;padding:3px 10px}.chip i{display:inline-block;width:9px;height:9px;border-radius:50%}
+.crosslink{display:inline-block;margin-top:10px;color:var(--band-fg);font-size:13px;text-decoration:underline;text-underline-offset:3px}
+</style>
+
+<link rel="stylesheet" href="../mint.css">
+<script>try{if(window.top!==window.self)document.documentElement.classList.add("embed")}catch(e){}</script>
+
+<header class="mast">
+  <div class="wrap">
+    <span class="eyebrow">สปสช. เขต 9 นครราชสีมา · จังหวัดบุรีรัมย์ · NHSO-MIS</span>
+    <h1>ผลงานบริการและการชดเชย รายหน่วยบริการ</h1>
+    <p id="mastSub">กำลังโหลดข้อมูลจาก NHSO-MIS…</p>
+    <div class="updated" id="updated"></div>
+    <div style="margin-top:6px;font-size:12.5px;color:var(--band-muted);letter-spacing:.03em">Design by Moveon · Orapat Viriyaudomsiri</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="toolbar">
+    <label class="ctl"><span>ปีงบประมาณ</span><select id="fy"></select></label>
+    <label class="ctl"><span>โรงพยาบาลของเรา</span><select id="home"></select></label>
+    <label class="ctl"><span>เทียบกับ</span><select id="cmp"></select></label>
+    <label class="ctl"><span>หน่วยบริการในตาราง</span><select id="utype">
+      <option value="hosp" selected>เฉพาะโรงพยาบาล</option>
+      <option value="pcu">รพ.สต. และคลินิก</option>
+      <option value="all">ทุกหน่วยบริการ</option></select></label>
+    <button type="button" class="btn ghost xp-all" id="xpAll" style="margin-left:auto;align-self:flex-end" title="ส่งออกทุกส่วนเป็นไฟล์ Excel (ตาราง + ภาพกราฟ)">⬇ Excel ทั้งหมด</button>
+  </div>
+  <div class="cmp-bar" id="cmpBar"><span class="note" style="margin-right:4px">รพ. ที่เทียบ:</span><div class="chips" id="multiChips"></div></div>
+
+  <section id="s-ov">
+    <div class="sec-h"><div><div class="k">รพ. ของเรา</div><h2 id="ovH">ภาพรวม 4 รายงาน</h2></div><div class="note" id="ovNote"></div></div>
+    <div class="tiles" id="tiles"></div>
+    <div class="panel"><div class="legend" id="leg_cOv" style="margin-bottom:10px"></div><div id="cOv"></div></div>
+    <details class="fold"><summary>ดูเป็นตารางตัวเลข</summary><div class="scroll" style="margin-top:10px"><table id="tOv" class="ov"></table></div></details>
+    <p class="note">อันดับคิดจากโรงพยาบาลในจังหวัด (ไม่รวม รพ.สต.) เรียงจากยอดชดเชยมากไปน้อย · เทียบปีก่อนคือปีงบก่อนหน้าทั้งปี ยกเว้นปีงบปัจจุบันที่ยังไม่ครบปี</p>
+  </section>
+
+  <section id="s-rep">
+    <div class="sec-h"><div><div class="k">รายงานรายหน่วยบริการ</div><h2 id="repH">ผู้รับบริการ สิทธิกรมบัญชีกลาง</h2></div>
+      <div class="rep-tabs" id="repTabs"></div></div>
+    <div class="panel"><div class="legend" id="leg_cRep" style="margin-bottom:10px"></div><div id="cRep"></div></div><details class="fold"><summary>ดูเป็นตารางตัวเลข</summary><div class="scroll" style="margin-top:10px"><table id="tRep"></table></div></details>
+    <p class="note" id="repNote"></p>
+  </section>
+
+  <section id="s-fund" hidden>
+    <div class="sec-h"><div><div class="k">ทุกกองทุน · MIS 0.1</div><h2 id="fundH">รายรับแยกกองทุนย่อย</h2></div><div class="note" id="fundNote"></div></div>
+    <div class="panel"><div class="legend" id="leg_cFund" style="margin-bottom:10px"></div><div id="cFund"></div></div><details class="fold"><summary>ดูเป็นตารางตัวเลข</summary><div class="scroll" style="margin-top:10px"><table id="tFund"></table></div></details>
+    <h3 class="sub-h">ยอดรายรับรวมทุกกองทุน รายโรงพยาบาล</h3>
+    <div class="panel"><div class="legend" id="leg_cFundRank" style="margin-bottom:10px"></div><div id="cFundRank"></div></div><details class="fold"><summary>ดูเป็นตารางตัวเลข</summary><div class="scroll" style="margin-top:10px"><table id="tFundRank"></table></div></details>
+  </section>
+
+  <section id="s-stmt" hidden>
+    <div class="sec-h"><div><div class="k">Statement UC · MIS 0.2</div><h2 id="stmtH">พึงรับ (REP) เทียบจ่ายจริง (STM)</h2></div>
+      <div class="note">ค้างจ่าย = REP − STM · % จ่าย = STM ÷ REP</div></div>
+    <div class="panel"><div class="legend" id="leg_cStmt" style="margin-bottom:10px"></div><div id="cStmt"></div></div><details class="fold"><summary>ดูเป็นตารางตัวเลข</summary><div class="scroll" style="margin-top:10px"><table id="tStmt"></table></div></details>
+    <h3 class="sub-h">สรุปรายโรงพยาบาล</h3>
+    <div class="panel"><div class="legend" id="leg_cStmtRank" style="margin-bottom:10px"></div><div id="cStmtRank"></div></div><details class="fold"><summary>ดูเป็นตารางตัวเลข</summary><div class="scroll" style="margin-top:10px"><table id="tStmtRank"></table></div></details>
+  </section>
+
+  <section id="s-svc" hidden>
+    <div class="sec-h"><div><div class="k">บริการเฉพาะ</div><h2 id="svcH">MOPH-Claim · KTP · อุปกรณ์ · ค่าใช้จ่ายสูง</h2></div>
+      <div class="rep-tabs" id="svcTabs"></div></div>
+    <div class="panel"><div class="legend" id="leg_cSvc" style="margin-bottom:10px"></div><div id="cSvc"></div></div><details class="fold"><summary>ดูเป็นตารางตัวเลข</summary><div class="scroll" style="margin-top:10px"><table id="tSvcRank"></table></div></details>
+    <div class="grid2" style="margin-top:12px">
+      <div class="panel scroll" style="align-self:start"><h3 class="sub-h" style="margin-top:0" id="svcItemsH">รายการของ รพ.เรา</h3><table id="tSvcItems"></table></div>
+    </div>
+  </section>
+
+  <section id="s-kpi" hidden>
+    <div class="sec-h"><div><div class="k">ผลงานบริการ · ทุก รพ.</div><h2 id="kpiH">ผู้ป่วยใน และคุณภาพการส่งข้อมูล Eclaim</h2></div>
+      <div class="rep-tabs" id="kpiTabs"></div></div>
+    <div class="panel"><div class="legend" id="leg_cKpi" style="margin-bottom:10px"></div><div id="cKpi"></div></div><details class="fold"><summary>ดูเป็นตารางตัวเลข</summary><div class="scroll" style="margin-top:10px"><table id="tKpi"></table></div></details>
+    <p class="note" id="kpiNote"></p>
+  </section>
+
+  <section id="s-all" hidden>
+    <div class="sec-h"><div><div class="k">ทุกเมนูใน MIS</div><h2>ตารางรายงานทั้งหมด</h2></div></div>
+    <div class="toolbar" style="border:0;padding-block:0 12px">
+      <label class="ctl" style="flex:1 1 320px"><span>รายงานรายหน่วยบริการในจังหวัด</span><select id="selProv"></select></label>
+    </div>
+    <div class="panel scroll"><table id="tProvX"></table></div>
+    <div class="toolbar" style="border:0;padding-block:18px 12px">
+      <label class="ctl" style="flex:1 1 320px"><span id="selHospLbl">รายงานของ รพ.เรา</span><select id="selHosp"></select></label>
+    </div>
+    <div class="panel scroll"><table id="tHospX"></table></div>
+  </section>
+
+  <section id="s-month" hidden>
+    <div class="sec-h"><div><div class="k">รายเดือน</div><h2 id="monH">ชดเชยรายเดือน</h2></div>
+      <div class="rep-tabs" id="monTabs"></div></div>
+    <div class="panel"><div class="legend" id="legMon" style="margin-bottom:6px"></div><div id="trend"></div></div>
+    <div class="panel scroll" style="margin-top:14px"><table id="tMon"></table></div>
+  </section>
+
+  <footer>ที่มา: สปสช. ระบบ NHSO-MIS for Hospital (mishos.nhso.go.th) รายงานระดับจังหวัดบุรีรัมย์: P9.1 สิทธิกรมบัญชีกลาง, P9.2 สิทธิพนักงานส่วนท้องถิ่น, P1.1 ผู้ป่วยนอกกรณีฉุกเฉิน (OPAE), P1.4 ผู้ป่วยนอกกรณีเหตุสมควร (WALKIN) · ชดเชยตาม REP ในระบบ MIS
+    <div style="margin-top:10px;font-family:var(--f-display);font-weight:500;color:var(--ink)">Design by Moveon · Orapat Viriyaudomsiri</div></footer>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+const FY_M=['ต.ค.','พ.ย.','ธ.ค.','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.'];
+const REPORTS={
+  ofc:{name:'ข้าราชการ (กรมบัญชีกลาง)',title:'ผู้รับบริการ สิทธิกรมบัญชีกลาง',ip:true},
+  lgo:{name:'อปท.',title:'ผู้รับบริการ สิทธิพนักงานส่วนท้องถิ่น',ip:true},
+  opae:{name:'ผู้ป่วยนอกฉุกเฉิน (OPAE)',title:'บริการผู้ป่วยนอกอุบัติเหตุ/ฉุกเฉิน',ip:false},
+  walkin:{name:'Walk-in (เหตุสมควร)',title:'บริการผู้ป่วยนอกกรณีเหตุสมควร (WALKIN)',ip:false}};
+const COMMUNITY=['10895','10896','10897','10898','10899','10900','10901','10902','10904','10905','10906','10907','10908','10909','10910','10911','10912','10913','10914','11619','23578','28020'];
+const C_HOME='var(--s1)', C_CMP='var(--s2)', C_GRP='var(--muted)';
+const $=id=>document.getElementById(id);
+const fmt=v=>v.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmt0=v=>Math.round(v).toLocaleString('th-TH');
+const mb=v=>(v/1e6).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2})+' ลบ.';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function lsGet(k){ try{ return localStorage.getItem(k);}catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v);}catch(e){} }
+let D=null; const S={fy:null,home:lsGet('nhso-transfer-home-v1')||'10909',cmp:'SIZE',multi:null,rep:'ofc',utype:'hosp',mon:'ofc'};
+const isHosp=(c,n)=>/^รพ\./.test(n)&&!/^รพ\.สต/.test(n)&&c.length===5&&!c.startsWith('0');
+const NAMES={};
+
+function rowsOf(fy,rep){ const y=D.years[fy]; if(!y||!y[rep]) return [];
+  return y[rep].map(r=>REPORTS[rep].ip?{c:r[0],n:r[1],opn:r[2],opb:r[3],ipn:r[4],ipb:r[5],cnt:r[2]+r[4],baht:r[3]+r[5]}:{c:r[0],n:r[1],cnt:r[2],baht:r[3]}); }
+function hospList(){ const s=new Map(); Object.values(D.years).forEach(y=>Object.values(y).forEach(rs=>rs.forEach(r=>{ if(isHosp(r[0],r[1])) s.set(r[0],r[1]); }))); return [...s.entries()].sort((a,b)=>a[0].localeCompare(b[0])); }
+function prevFY(){ return String(+S.fy-1); }
+function sign(v,f){ const s=f(Math.abs(v)); if(s===f(0)) return s; return (v>0?'▲ +':'▼ −')+s; }
+const pct=(a,b)=>b?((a-b)/Math.abs(b)*100):null;
+const pc=v=>v==null?'<span class="muted">–</span>':`<span class="${v<0?'chg-dn':'chg-up'}">${v>0?'▲ +':v<0?'▼ ':''}${v.toFixed(1)}%</span>`;
+function nm(c){ return NAMES[c]||c; }
+const LS_MULTI='nhso-mis-multi-v1';
+const MCOL=['var(--s2)','var(--s3)','var(--s4)','var(--s5)','var(--s7)'];
+function sizeTot(){ // hospital size = total income all funds (MIS 0.1), fallback OFC+LGO compensation
+  const t={}; const fy=D.funds&&(D.funds[S.fy]?S.fy:Object.keys(D.funds).sort().pop());
+  if(fy) Object.entries(D.funds[fy]).forEach(([c,f])=>t[c]=(f.budget||[]).reduce((a,r)=>a+r[2],0));
+  else ['ofc','lgo'].forEach(k=>rowsOf(S.fy,k).forEach(r=>t[r.c]=(t[r.c]||0)+r.baht));
+  return t; }
+function sizePeers(n=4){ const t=sizeTot(), me=t[S.home]||0;
+  return Object.keys(t).filter(c=>c!==S.home&&t[c]>0&&isHosp(c,nm(c))).sort((a,b)=>Math.abs(t[a]-me)-Math.abs(t[b]-me)).slice(0,n); }
+function multi(){ if(!Array.isArray(S.multi)){ let m=null; try{ m=JSON.parse(lsGet(LS_MULTI)||'null'); }catch(e){} S.multi=Array.isArray(m)&&m.length?m.filter(c=>NAMES[c]):sizePeers(4); }
+  S.multi=S.multi.filter(c=>c!==S.home); return S.multi; }
+function setMulti(a){ S.multi=a.filter(c=>c!==S.home).slice(0,5); lsSet(LS_MULTI,JSON.stringify(S.multi)); }
+function refList(){ return S.cmp==='SIZE'?multi():S.cmp==='AVG'?COMMUNITY.filter(c=>c!==S.home):[S.cmp]; }
+function isRef(c){ return S.cmp==='SIZE'?multi().includes(c):c===S.cmp; }
+function hc(c){ return c===S.home?C_HOME:(isRef(c)?(S.cmp==='SIZE'?mcol(c):C_CMP):C_GRP); }
+function mcol(c){ const i=multi().indexOf(c); return i<0?C_CMP:MCOL[i%MCOL.length]; }
+// series to draw side by side: home + each selected hospital (SIZE) or the reference
+function serList(){ const s=[{c:S.home,label:nm(S.home),col:C_HOME}];
+  if(S.cmp==='SIZE') multi().forEach(c=>s.push({c,label:nm(c),col:mcol(c)}));
+  else s.push({c:S.cmp==='AVG'?'AVG':S.cmp,label:CL(),col:C_CMP}); return s; }
+function renderChips(){ const on=S.cmp==='SIZE'; $('cmpBar').hidden=!on; if(!on) return;
+  const others=hospList().map(x=>x[0]).filter(c=>c!==S.home&&!multi().includes(c));
+  $('multiChips').innerHTML=multi().map(c=>`<button type="button" class="chip sm" data-rm="${c}" title="เอาออก"><i style="background:${mcol(c)}"></i>${esc(nm(c))} ✕</button>`).join('')+
+    (multi().length<5?`<select id="addMulti" aria-label="เพิ่ม รพ. ที่เทียบ" style="font-size:13px"><option value="">+ เพิ่ม รพ.</option>${others.map(c=>`<option value="${c}">${esc(nm(c))}</option>`).join('')}</select>`:'')+
+    `<button type="button" class="chip sm" id="sizeBtn">ใช้ 4 รพ. ขนาดใกล้เคียง</button>`; }
+
+function buildControls(){
+  const fys=Object.keys(D.years).sort().reverse(); if(!fys.includes(S.fy)) S.fy=fys.find(f=>Object.keys(D.years[f]).length&&(D.years[f].ofc||[]).length>30)||fys[0];
+  $('fy').innerHTML=fys.map(f=>`<option value="${f}" ${f===S.fy?'selected':''}>ปีงบประมาณ ${f}${f===fys[0]?' (ยังไม่ครบปี)':''}</option>`).join('');
+  const H=hospList(); H.forEach(([c,n])=>NAMES[c]=n);
+  if(!NAMES[S.home]) S.home='10909';
+  $('home').innerHTML=H.map(([c,n])=>`<option value="${c}" ${c===S.home?'selected':''}>${esc(n)} (${c})</option>`).join('');
+  if(S.cmp!=='AVG'&&S.cmp!=='SIZE'&&(S.cmp===S.home||!NAMES[S.cmp])) S.cmp='SIZE';
+  $('cmp').innerHTML=`<option value="SIZE" ${S.cmp==='SIZE'?'selected':''}>รพ. ที่เลือกเทียบ (${multi().length} แห่ง · ตั้งต้นขนาดใกล้เคียง)</option><option value="AVG" ${S.cmp==='AVG'?'selected':''}>ค่าเฉลี่ย รพ.ชุมชน</option>`+H.filter(([c])=>c!==S.home).map(([c,n])=>`<option value="${c}" ${c===S.cmp?'selected':''}>${esc(n)}</option>`).join('');
+  $('repTabs').innerHTML=Object.entries(REPORTS).map(([k,v])=>`<button type="button" data-r="${k}" aria-pressed="${k===S.rep}">${v.name}</button>`).join('');
+}
+function refVal(rows,key){ const L=refList(); const g=rows.filter(x=>L.includes(x.c)); return g.length?g.reduce((a,x)=>a+x[key],0)/(S.cmp==='AVG'?g.length:L.length):0; }
+const CL=()=>S.cmp==='AVG'?'เฉลี่ย รพ.ชุมชน':S.cmp==='SIZE'?`เฉลี่ย ${multi().length} รพ. ที่เลือกเทียบ`:nm(S.cmp);
+
+function renderOverview(){
+  $('ovH').textContent=`${nm(S.home)} · ปีงบ ${S.fy}`;
+  $('ovNote').textContent=`เทียบกับ ${CL()}`;
+  const tiles=[], rows=[];
+  for(const [k,v] of Object.entries(REPORTS)){
+    const rs=rowsOf(S.fy,k), hs=rs.filter(r=>isHosp(r.c,r.n)).sort((a,b)=>b.baht-a.baht);
+    const me=rs.find(r=>r.c===S.home)||{cnt:0,baht:0}; const old=rowsOf(prevFY(),k).find(r=>r.c===S.home);
+    const rank=hs.findIndex(r=>r.c===S.home)+1;
+    const ref=refVal(rs,'baht'), refc=refVal(rs,'cnt');
+    tiles.push(`<div class="tile"><div class="l">${v.name}</div><div class="v">${mb(me.baht)}</div><div class="c">${fmt0(me.cnt)} ครั้ง · อันดับ ${rank||'–'}/${hs.length} · ${esc(CL())} ${mb(ref)}</div></div>`);
+    rows.push(`<tr><td><strong>${v.name}</strong></td><td>${fmt0(me.cnt)}</td><td>${fmt(me.baht)}</td><td>${me.cnt?fmt(me.baht/me.cnt):'–'}</td><td>${fmt0(refc)}</td><td>${fmt(ref)}</td><td>${sign(me.baht-ref,fmt)}</td><td>${old?pc(pct(me.baht,old.baht)):'<span class="muted">–</span>'}</td><td><span class="rank ${rank===1?'top':''}">${rank||'–'}/${hs.length}</span></td></tr>`);
+  }
+  $('tiles').innerHTML=tiles.join('');
+  const SER=serList(); legend('cOv',SER.map(x=>[x.col,x.label]),'ยอดชดเชย · ตัวเลข = ครั้ง');
+  const items=Object.entries(REPORTS).map(([k,v])=>{ const rs=rowsOf(S.fy,k); const val=x=>{ if(x.c==='AVG') return [refVal(rs,'baht'),refVal(rs,'cnt')]; const r=rs.find(y=>y.c===x.c); return r?[r.baht,r.cnt]:[0,0]; };
+    return {name:v.name,vals:SER.map(x=>{ const [b,n]=val(x); return {v:b,col:x.col,who:x.label,lab:kb(b)+` <span class="muted">· ${fmt0(n)} ครั้ง</span>`}; })}; });
+  $('cOv').innerHTML=cmpRows(items);
+  $('tOv').innerHTML=`<thead><tr><th>รายงาน</th><th>ครั้ง</th><th>ชดเชย (บาท)</th><th>บาท/ครั้ง</th><th>ครั้ง ${esc(CL())}</th><th>ชดเชย ${esc(CL())}</th><th>ส่วนต่าง</th><th>เทียบปีงบ ${prevFY()}</th><th>อันดับ</th></tr></thead><tbody>${rows.join('')}</tbody>`;
+}
+
+function renderReport(){
+  const v=REPORTS[S.rep]; $('repH').textContent=`${v.title} · ปีงบ ${S.fy}`;
+  document.querySelectorAll('#repTabs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===S.rep));
+  let rs=rowsOf(S.fy,S.rep);
+  rs=rs.filter(r=>S.utype==='all'?true:S.utype==='hosp'?isHosp(r.c,r.n):!isHosp(r.c,r.n));
+  rs.sort((a,b)=>b.baht-a.baht);
+  const old=new Map(rowsOf(prevFY(),S.rep).map(r=>[r.c,r]));
+  const mx=Math.max(1,...rs.map(r=>r.baht));
+  const tot=rs.reduce((a,r)=>{a.cnt+=r.cnt;a.baht+=r.baht;a.opn+=r.opn||0;a.opb+=r.opb||0;a.ipn+=r.ipn||0;a.ipb+=r.ipb||0;return a;},{cnt:0,baht:0,opn:0,opb:0,ipn:0,ipb:0});
+  const head=v.ip?'<th>OP ครั้ง</th><th>OP ชดเชย</th><th>IP ครั้ง</th><th>IP ชดเชย</th>':'<th>ครั้ง</th>';
+  $('tRep').innerHTML=`<thead><tr><th>#</th><th style="text-align:left">หน่วยบริการ</th><th>รวมชดเชย (บาท)</th>${head}<th>บาท/ครั้ง</th><th>เทียบปีงบ ${prevFY()}</th></tr></thead><tbody>`+
+    (rs.length?rs.map((r,i)=>{ const o=old.get(r.c);
+      return `<tr class="${r.c===S.home?'home':''}"><td>${i+1}</td><td style="text-align:left"><span class="hn"><i class="dot" style="background:${hc(r.c)}"></i>${esc(r.n)} <span class="muted" style="font-weight:400">${r.c}</span>${r.c===S.home?'<span class="home-tag">รพ.เรา</span>':''}</span></td>
+      <td><div class="cellbar"><b style="width:${Math.max(2,r.baht/mx*120)}px;background:${hc(r.c)};opacity:${r.c===S.home||r.c===S.cmp?1:.5}"></b><span>${fmt(r.baht)}</span></div></td>
+      ${v.ip?`<td>${fmt0(r.opn)}</td><td>${fmt(r.opb)}</td><td>${fmt0(r.ipn)}</td><td>${fmt(r.ipb)}</td>`:`<td>${fmt0(r.cnt)}</td>`}
+      <td>${r.cnt?fmt(r.baht/r.cnt):'–'}</td><td>${o?pc(pct(r.baht,o.baht)):'<span class="muted">–</span>'}</td></tr>`; }).join('')+
+      `<tr><td></td><td style="text-align:left"><strong>รวม ${rs.length} หน่วย</strong></td><td><strong>${fmt(tot.baht)}</strong></td>${v.ip?`<td>${fmt0(tot.opn)}</td><td>${fmt(tot.opb)}</td><td>${fmt0(tot.ipn)}</td><td>${fmt(tot.ipb)}</td>`:`<td>${fmt0(tot.cnt)}</td>`}<td>${tot.cnt?fmt(tot.baht/tot.cnt):'–'}</td><td></td></tr>`
+      :`<tr><td colspan="9" class="empty">ไม่มีข้อมูล</td></tr>`)+'</tbody>';
+  if(v.ip){ legend('cRep',[[C_HOME,'OP รพ.เรา'],[C_CMP,'OP รพ. ที่เลือกเทียบ'],[C_GRP,'OP รพ. อื่น'],['var(--s4)','IP (ผู้ป่วยใน)']],'ความยาวแท่ง = รวมชดเชย · ตัวเลข = ครั้ง');
+    $('cRep').innerHTML=rankRows(rs.map(r=>({c:r.c,segs:[{v:r.opb,col:hc(r.c),t:'OP '+fmt(r.opb)},{v:r.ipb,col:'var(--s4)',t:'IP '+fmt(r.ipb)}],lab:kb(r.baht)+` <span class="muted">· OP ${fmt0(r.opn)} · IP ${fmt0(r.ipn)} ครั้ง</span>`})));
+  } else { legend('cRep',LEG3,'ยอดชดเชย · ตัวเลข = ครั้ง');
+    $('cRep').innerHTML=rankRows(rs.map(r=>({c:r.c,segs:[{v:r.baht,col:hc(r.c)}],lab:kb(r.baht)+` <span class="muted">· ${fmt0(r.cnt)} ครั้ง</span>`}))); }
+  $('repNote').textContent=S.utype==='pcu'?'รพ.สต. และคลินิกที่เบิกตรงในสิทธินี้ แสดงตามรหัสหน่วยบริการของตัวเอง':'กดเปลี่ยน "หน่วยบริการในตาราง" ด้านบน เพื่อดู รพ.สต. และคลินิก';
+}
+
+
+/* ---------- charts ---------- */
+const MIS_URL='https://mishos.nhso.go.th/mis_hos/';
+function legend(id,items,note){ $('leg_'+id).innerHTML=items.map(([c,l])=>`<span><i style="background:${c}"></i>${esc(l)}</span>`).join('')+(note?` <span class="muted">· ${esc(note)}</span>`:''); }
+const LEG3=[[C_HOME,'รพ.เรา'],[C_CMP,'รพ. ที่เลือกเทียบ (สีตามป้ายด้านบน)'],[C_GRP,'รพ. อื่น']];
+function rankRows(items,mx){ mx=mx||Math.max(1e-9,...items.map(s=>s.segs.reduce((a,g)=>a+Math.max(0,g.v),0)));
+  return items.length?items.map((s,i)=>`<div class="rk-row ${s.c===S.home?'me':''}"><span class="muted" style="font-size:12.5px;text-align:right">${i+1}</span><span class="rk-name" title="${esc(nm(s.c))}">${esc(nm(s.c))}${s.c===S.home?' <span class="home-tag">รพ.เรา</span>':''}</span>
+    <div class="rk-bar">${s.segs.filter(g=>g.v>0).map(g=>`<i style="width:calc(${g.v/mx} * (100% - 170px));background:${g.col};${g.op!=null?'opacity:'+g.op:''}" title="${esc(g.t||'')}"></i>`).join('')}<span style="margin-left:8px">${s.lab}</span></div></div>`).join('')
+    :'<div class="empty">ไม่มีข้อมูล</div>'; }
+function cmpRows(items,mx){ // items:[{name,sub,vals:[{v,col,lab}]}]
+  mx=mx||Math.max(1e-9,...items.flatMap(x=>x.vals.map(v=>v.v)));
+  return items.map(x=>`<div class="cmp-row"><div class="nm">${esc(x.name)}${x.sub?`<small>${x.sub}</small>`:''}</div><div class="bars">${x.vals.map(v=>`<div class="rk-bar"><i style="width:calc(${Math.max(0,v.v)/mx} * (100% - 260px));background:${v.col}"></i><span style="margin-left:8px">${v.lab}${v.who?` <span class="muted" style="font-size:12px">· ${esc(String(v.who).replace(/^รพ\./,''))}</span>`:''}</span></div>`).join('')}</div></div>`).join(''); }
+const kb=v=>Math.abs(v)>=1e6?mb(v):(v/1e3).toLocaleString('th-TH',{maximumFractionDigits:1})+' พันบ.';
+/* ----- monthly (optional, from per-hospital pages) ----- */
+function niceTicks(max){ if(max<=0) return [0,1]; const raw=max/4, p=Math.pow(10,Math.floor(Math.log10(raw))); const st=[1,2,2.5,5,10].map(x=>x*p).find(x=>x>=raw);
+  const t=[]; for(let v=0;v<=max+st*0.001;v+=st) t.push(v); if(t[t.length-1]<max) t.push(t[t.length-1]+st); return t; }
+function monSeries(code,rep){ const m=D.monthly&&D.monthly[S.fy]&&D.monthly[S.fy][code]&&D.monthly[S.fy][code][rep]; if(!m) return null;
+  const a=Array(12).fill(null); m.forEach(r=>{ const [y,mm]=r[0].split('-').map(Number); const fm=(mm+2)%12; a[fm]=r[2]+r[4]; }); return a; }
+function renderMonthly(){
+  const has=D.monthly&&D.monthly[S.fy]; $('s-month').hidden=!has; if(!has) return;
+  $('monTabs').innerHTML=['ofc','lgo'].map(k=>`<button type="button" data-m="${k}" aria-pressed="${k===S.mon}">${REPORTS[k].name}</button>`).join('');
+  $('monH').textContent=`ชดเชยรายเดือน ${REPORTS[S.mon].name} · ปีงบ ${S.fy}`;
+  const me=monSeries(S.home,S.mon);
+  let ref=null, refLabel=CL();
+  { const all=refList().map(c=>monSeries(c,S.mon)).filter(Boolean); if(all.length) ref=Array(12).fill(0).map((_,i)=>{ const v=all.map(a=>a[i]).filter(x=>x!=null); return v.length?v.reduce((a,b)=>a+b,0)/v.length:null; }); }
+  const ser=(S.cmp==='SIZE'?[{label:nm(S.home),color:C_HOME,a:me},...multi().map(c=>({label:nm(c),color:mcol(c),a:monSeries(c,S.mon)}))]:[{label:nm(S.home),color:C_HOME,a:me},{label:refLabel,color:C_CMP,a:ref}]).filter(s=>s.a);
+  $('legMon').innerHTML=ser.map(s=>`<span><i style="background:${s.color}"></i>${esc(s.label)}</span>`).join('');
+  const W=860,Ht=280,L=64,R=16,T=28,B=30,iw=W-L-R,ih=Ht-T-B;
+  const vals=ser.flatMap(s=>s.a.filter(v=>v!=null)); const ticks=niceTicks(Math.max(0,...vals)); const top=ticks[ticks.length-1];
+  const y=v=>T+ih-v/(top||1)*ih, x=i=>L+iw*(i+0.5)/12;
+  let svg=`<svg viewBox="0 0 ${W} ${Ht}" role="img" aria-label="ชดเชยรายเดือน">`;
+  ticks.forEach(t=>svg+=`<line x1="${L}" x2="${W-R}" y1="${y(t)}" y2="${y(t)}" stroke="var(--rule)"/><text x="${L-8}" y="${y(t)+4}" text-anchor="end">${(t/1e3).toLocaleString('th-TH',{maximumFractionDigits:0})}</text>`);
+  svg+=`<text x="${L-8}" y="${T-14}" text-anchor="end" style="font-size:11px">พันบาท</text>`;
+  FY_M.forEach((m,i)=>svg+=`<text x="${x(i)}" y="${Ht-8}" text-anchor="middle">${m}</text>`);
+  ser.slice().reverse().forEach(s=>{ let d='',pen=false; s.a.forEach((v,i)=>{ if(v==null){pen=false;return;} d+=(pen?'L':'M')+x(i).toFixed(1)+','+y(v).toFixed(1); pen=true; });
+    svg+=`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2.5"/>`; s.a.forEach((v,i)=>{ if(v!=null) svg+=`<circle cx="${x(i)}" cy="${y(v)}" r="3" fill="${s.color}" stroke="var(--surface)" stroke-width="2"/>`; }); });
+  $('trend').innerHTML=svg+'</svg>';
+  const m=D.monthly[S.fy][S.home]&&D.monthly[S.fy][S.home][S.mon]||[];
+  $('tMon').innerHTML=`<thead><tr><th>เดือน</th><th>OP ครั้ง</th><th>OP ชดเชย</th><th>IP ครั้ง</th><th>IP ชดเชย</th><th>รวมชดเชย</th></tr></thead><tbody>`+
+    (m.length?m.map(r=>`<tr><td>${r[0]}</td><td>${fmt0(r[1])}</td><td>${fmt(r[2])}</td><td>${fmt0(r[3])}</td><td>${fmt(r[4])}</td><td><strong>${fmt(r[2]+r[4])}</strong></td></tr>`).join(''):'<tr><td colspan="6" class="empty">ไม่มีข้อมูลรายเดือนของ รพ. นี้</td></tr>')+'</tbody>';
+}
+
+const SVC={moph:'MOPH-Claim',ktp:'KTP (Krungthai)',inst:'อวัยวะเทียม/อุปกรณ์',hc:'ค่าใช้จ่ายสูง'};
+const HCN={stemi:'ยาละลายลิ่มเลือด',cancer:'เคมีบำบัด/รังสีรักษา',cataract:'ต้อกระจก',stone:'นิ่วทางเดินปัสสาวะ'};
+S.svc='moph';
+function F(c){ return D.funds&&D.funds[S.fy]&&D.funds[S.fy][c]||null; }
+function fundCodes(){ return D.funds&&D.funds[S.fy]?Object.keys(D.funds[S.fy]):[]; }
+function refCodes(){ return refList().filter(c=>F(c)); }
+function hrow(c,cells){ return `<tr class="${c===S.home?'home':''}"><td style="text-align:left"><span class="hn"><i class="dot" style="background:${hc(c)}"></i>${esc(nm(c))}${c===S.home?'<span class="home-tag">รพ.เรา</span>':''}</span></td>${cells}</tr>`; }
+function renderFunds(){
+  const has=fundCodes().length; $('s-fund').hidden=$('s-stmt').hidden=$('s-svc').hidden=!has; if(!has) return;
+  const refs=refCodes(), n=refs.length||1, me=F(S.home)||{};
+  // 0.1 budget by sub-fund
+  const agg=(c)=>{ const m=new Map(); ((F(c)||{}).budget||[]).forEach(r=>m.set(r[1],(m.get(r[1])||0)+r[2])); return m; };
+  const mm=agg(S.home), rm=new Map(); refs.forEach(c=>agg(c).forEach((v,k)=>rm.set(k,(rm.get(k)||0)+v/n)));
+  const keys=[...new Set([...mm.keys(),...rm.keys()])].sort((a,b)=>(mm.get(b)||0)-(mm.get(a)||0));
+  const tm=[...mm.values()].reduce((a,b)=>a+b,0), tr=[...rm.values()].reduce((a,b)=>a+b,0);
+  const all=fundCodes().filter(c=>isHosp(c,nm(c)));
+  const rankK=k=>{ const v=all.map(c=>agg(c).get(k)||0); const mine=mm.get(k)||0; return 1+v.filter(x=>x>mine).length; };
+  $('fundH').textContent=`รายรับแยกกองทุนย่อย · ${nm(S.home)} · ปีงบ ${S.fy}`; $('fundNote').textContent=`เทียบกับ ${CL()}`;
+  $('tFund').innerHTML=`<thead><tr><th>กองทุนย่อย</th><th>${esc(nm(S.home))}</th><th>${esc(CL())}</th><th>ส่วนต่าง</th><th>สัดส่วน รพ.เรา</th><th>สัดส่วน ${esc(CL())}</th><th>อันดับ</th></tr></thead><tbody>`+
+    keys.map(k=>{ const a=mm.get(k)||0,b=rm.get(k)||0, r=rankK(k); return `<tr><td class="wrap-t"><strong>${esc(k)}</strong></td><td>${fmt(a)}</td><td>${fmt(b)}</td><td class="${a-b<0?'dn':'up'}">${sign(a-b,fmt)}</td><td>${tm?(a/tm*100).toFixed(1):'0.0'}%</td><td class="muted">${tr?(b/tr*100).toFixed(1):'0.0'}%</td><td><span class="rank ${r===1?'top':''}">${r}/${all.length}</span></td></tr>`; }).join('')+
+    `<tr><td><strong>รวมทุกกองทุน</strong></td><td><strong>${fmt(tm)}</strong></td><td><strong>${fmt(tr)}</strong></td><td>${sign(tm-tr,fmt)}</td><td>100%</td><td class="muted">100%</td><td></td></tr></tbody>`;
+  const SER=serList(), AG={}; SER.forEach(x=>{ AG[x.c]=x.c==='AVG'?rm:agg(x.c); });
+  legend('cFund',SER.map(x=>[x.col,x.label]),'บาท · ใต้ชื่อ = อันดับ รพ.เรา ในจังหวัด');
+  $('cFund').innerHTML=cmpRows(keys.map(k=>{ const a=mm.get(k)||0; return {name:k,sub:`อันดับ ${rankK(k)}/${all.length} · ${tm?(a/tm*100).toFixed(1):0}% ของรายรับ`,vals:SER.map(x=>{ const v=AG[x.c].get(k)||0; return {v,col:x.col,who:x.label,lab:kb(v)}; })}; }));
+  const ranks=all.map(c=>({c,t:[...agg(c).values()].reduce((a,b)=>a+b,0)})).sort((a,b)=>b.t-a.t); const mx=Math.max(1,...ranks.map(r=>r.t));
+  $('tFundRank').innerHTML=`<thead><tr><th style="text-align:left">โรงพยาบาล</th><th>รายรับรวม (บาท)</th></tr></thead><tbody>`+ranks.map(r=>hrow(r.c,`<td><div class="cellbar"><b style="width:${Math.max(2,r.t/mx*160)}px;background:${hc(r.c)};opacity:${r.c===S.home||r.c===S.cmp?1:.5}"></b><span>${fmt(r.t)}</span></div></td>`)).join('')+'</tbody>';
+  legend('cFundRank',LEG3,'รายรับรวมทุกกองทุน');
+  $('cFundRank').innerHTML=rankRows(ranks.map(r=>({c:r.c,segs:[{v:r.t,col:hc(r.c)}],lab:mb(r.t)})));
+  // 0.2 statement
+  const st=(me.stmt||[]).slice().sort((a,b)=>b[4]-a[4]);
+  const refPay=k=>{ const v=refs.map(c=>((F(c)||{}).stmt||[]).find(r=>r[1]===k)).filter(Boolean); const R=v.reduce((a,r)=>a+r[4],0), P=v.reduce((a,r)=>a+r[5],0); return R?P/R*100:null; };
+  const sR=st.reduce((a,r)=>a+r[4],0), sP=st.reduce((a,r)=>a+r[5],0);
+  $('stmtH').textContent=`พึงรับ (REP) เทียบจ่ายจริง (STM) · ${nm(S.home)} · ปีงบ ${S.fy}`;
+  $('tStmt').innerHTML=`<thead><tr><th>กองทุน</th><th style="text-align:left">รายการ</th><th>ครั้ง</th><th>พึงรับ REP</th><th>จ่ายจริง STM</th><th>ค้างจ่าย</th><th>% จ่าย</th><th>% จ่าย ${esc(CL())}</th></tr></thead><tbody>`+
+    (st.length?st.map(r=>{ const p=r[4]?r[5]/r[4]*100:null, q=refPay(r[1]); return `<tr><td>${esc(r[0])}</td><td class="wrap-t">${esc(r[2])} <span class="muted">${esc(r[1])}</span></td><td>${fmt0(r[3])}</td><td>${fmt(r[4])}</td><td>${fmt(r[5])}</td><td class="${r[4]-r[5]>0.5?'dn':''}">${fmt(r[4]-r[5])}</td><td>${p==null?'–':`<span class="pill ${p<90?'warn':'good'}">${p.toFixed(1)}%</span>`}</td><td class="muted">${q==null?'–':q.toFixed(1)+'%'}</td></tr>`; }).join('')+
+      `<tr><td></td><td style="text-align:left"><strong>รวม</strong></td><td>${fmt0(st.reduce((a,r)=>a+r[3],0))}</td><td><strong>${fmt(sR)}</strong></td><td><strong>${fmt(sP)}</strong></td><td><strong>${fmt(sR-sP)}</strong></td><td>${sR?(sP/sR*100).toFixed(1)+'%':'–'}</td><td></td></tr>`
+      :'<tr><td colspan="8" class="empty">ไม่มีข้อมูล Statement UC ของ รพ. นี้</td></tr>')+'</tbody>';
+  const srank=all.map(c=>{ const s=(F(c)||{}).stmt||[]; const R=s.reduce((a,r)=>a+r[4],0),P=s.reduce((a,r)=>a+r[5],0); return {c,R,P}; }).filter(x=>x.R).sort((a,b)=>b.R-a.R);
+  $('tStmtRank').innerHTML=`<thead><tr><th style="text-align:left">โรงพยาบาล</th><th>พึงรับ REP</th><th>จ่ายจริง STM</th><th>ค้างจ่าย</th><th>% จ่าย</th></tr></thead><tbody>`+srank.map(x=>hrow(x.c,`<td>${fmt(x.R)}</td><td>${fmt(x.P)}</td><td>${fmt(x.R-x.P)}</td><td>${(x.P/x.R*100).toFixed(1)}%</td>`)).join('')+'</tbody>';
+  legend('cStmt',[['var(--s1)','จ่ายจริง STM'],['var(--s8)','ค้างจ่าย']],'ความยาวแท่ง = พึงรับ REP · ตัวเลข = % จ่าย รพ.เรา / '+CL());
+  $('cStmt').innerHTML='<div class="empty">ไม่มีข้อมูล Statement UC ของ รพ. นี้</div>';
+  if(st.length){ const mxS=Math.max(1,...st.map(r=>r[4])); $('cStmt').innerHTML=st.slice(0,15).map(r=>{ const p=r[4]?r[5]/r[4]*100:0,q=refPay(r[1]);
+    return `<div class="cmp-row"><div class="nm">${esc(r[2]||r[1])}<small>${esc(r[0])} · จ่าย ${p.toFixed(1)}%${q==null?'':` · ${esc(CL())} ${q.toFixed(1)}%`}</small></div><div class="rk-bar"><i style="width:calc(${Math.max(0,r[5])/mxS} * (100% - 120px));background:var(--s1)" title="STM ${fmt(r[5])}"></i><i style="width:calc(${Math.max(0,r[4]-r[5])/mxS} * (100% - 120px));background:var(--s8)" title="ค้าง ${fmt(r[4]-r[5])}"></i><span style="margin-left:8px">${kb(r[4])}</span></div></div>`; }).join('')+(st.length>15?`<p class="note" style="margin:8px 0 0">แสดง 15 รายการที่พึงรับสูงสุด จากทั้งหมด ${st.length} รายการ · ดูครบในตารางตัวเลข</p>`:''); }
+  legend('cStmtRank',[[C_HOME,'จ่ายจริง รพ.เรา'],[C_CMP,'จ่ายจริง รพ. ที่เลือกเทียบ'],[C_GRP,'จ่ายจริง รพ. อื่น'],['var(--s8)','ค้างจ่าย']],'ความยาวแท่ง = พึงรับ REP');
+  $('cStmtRank').innerHTML=rankRows(srank.map(x=>({c:x.c,segs:[{v:x.P,col:hc(x.c),t:'STM '+fmt(x.P)},{v:x.R-x.P,col:'var(--s8)',t:'ค้าง '+fmt(x.R-x.P)}],lab:mb(x.R)+` <span class="muted">· จ่าย ${(x.P/x.R*100).toFixed(1)}%</span>`})));
+  renderSvc(all);
+}
+function renderSvc(all){
+  $('svcTabs').innerHTML=Object.entries(SVC).map(([k,v])=>`<button type="button" data-s="${k}" aria-pressed="${k===S.svc}">${v}</button>`).join('');
+  const tot=c=>{ const f=F(c)||{}; if(S.svc==='hc'){ const h=f.hc||{}; return Object.values(h).reduce((a,v)=>[a[0]+v[0],a[1]+v[1]],[0,0]); } return (f[S.svc]||[]).reduce((a,r)=>[a[0]+r[1],a[1]+r[2]],[0,0]); };
+  const rk=all.map(c=>({c,t:tot(c)})).filter(x=>x.t[1]||x.t[0]).sort((a,b)=>b.t[1]-a.t[1]);
+  $('tSvcRank').innerHTML=`<thead><tr><th style="text-align:left">โรงพยาบาล (${SVC[S.svc]})</th><th>ครั้ง</th><th>ชดเชย (บาท)</th></tr></thead><tbody>`+(rk.length?rk.map(x=>hrow(x.c,`<td>${fmt0(x.t[0])}</td><td>${fmt(x.t[1])}</td>`)).join(''):'<tr><td colspan="3" class="empty">ไม่มีข้อมูล</td></tr>')+'</tbody>';
+  legend('cSvc',LEG3,SVC[S.svc]+' · ชดเชย · ตัวเลข = ครั้ง');
+  $('cSvc').innerHTML=rankRows(rk.map(x=>({c:x.c,segs:[{v:x.t[1],col:hc(x.c)}],lab:kb(x.t[1])+` <span class="muted">· ${fmt0(x.t[0])} ครั้ง</span>`})));
+  const f=F(S.home)||{}; $('svcItemsH').textContent=`รายการของ ${nm(S.home)}`;
+  const items=S.svc==='hc'?Object.entries(f.hc||{}).map(([k,v])=>[HCN[k]||k,v[0],v[1]]):(f[S.svc]||[]).slice().sort((a,b)=>b[2]-a[2]);
+  $('tSvcItems').innerHTML=`<thead><tr><th>รายการ</th><th>ครั้ง</th><th>ชดเชย</th></tr></thead><tbody>`+(items.length?items.map(r=>`<tr><td class="wrap-t">${esc(r[0])}</td><td>${fmt0(r[1])}</td><td>${fmt(r[2])}</td></tr>`).join(''):'<tr><td colspan="3" class="empty">ไม่มีรายการ</td></tr>')+'</tbody>';
+}
+document.addEventListener('click',e=>{ const b=e.target.closest('#svcTabs [data-s]'); if(!b) return; S.svc=b.dataset.s; renderSvc(fundCodes().filter(c=>isHosp(c,nm(c)))); });
+/* ---------- extra MIS menus ---------- */
+S.kpi='ip'; S.selProv=0; S.selHosp=0;
+function genTable(tb,hdr,rows,codeCol){
+  const isNum=v=>/^-?[\d,]+(\.\d+)?%?$/.test(String(v).trim());
+  return `<thead><tr>${hdr.map((h,i)=>`<th style="${i<2?'text-align:left':''}">${esc(h)}</th>`).join('')}</tr></thead><tbody>`+
+    rows.map(r=>{ const me=codeCol>=0&&String(r[codeCol]).trim()===S.home; return `<tr class="${me?'home':''}">${r.map((v,i)=>`<td style="${!isNum(v)||i<1?'text-align:left;white-space:normal':''}">${esc(v)}${me&&i===1?'<span class="home-tag">รพ.เรา</span>':''}</td>`).join('')}</tr>`; }).join('')+'</tbody>';
+}
+function renderExtra(){
+  const X=D.extra&&D.extra[S.fy]; $('s-all').hidden=!X; $('s-kpi').hidden=!(X&&X.kpi); if(!X) return;
+  const P=X.prov||[];
+  $('selProv').innerHTML=P.map((t,i)=>`<option value="${i}" ${i==S.selProv?'selected':''}>${esc(t.menu)} · ${esc(t.h)}</option>`).join('');
+  const tp=P[S.selProv]; $('tProvX').innerHTML=tp?genTable($('tProvX'),tp.hdr,tp.rows,tp.hdr.findIndex(h=>/รหัส/.test(h))):'';
+  const HT=(X.hosp||{})[S.home]||[];
+  $('selHospLbl').textContent=`รายงานของ ${nm(S.home)} (ทีละเมนู)`;
+  if(S.selHosp>=HT.length) S.selHosp=0;
+  $('selHosp').innerHTML=HT.length?HT.map((t,i)=>`<option value="${i}" ${i==S.selHosp?'selected':''}>${esc(t.menu)} · ${esc(t.h)}</option>`).join(''):'<option>ยังไม่มีข้อมูลของ รพ. นี้</option>';
+  const th=HT[S.selHosp]; $('tHospX').innerHTML=th?genTable($('tHospX'),th.hdr,th.rows,-1):'';
+  if(X.kpi) renderKpi(X.kpi);
+}
+const KPIS={ip:{name:'ผู้ป่วยใน (UC)',cols:[['ครั้ง','n',0],['AdjRW','rw',2],['CMI','cmi',4]],sort:'rw'},
+  eop:{name:'Eclaim OP UC',cols:[['ส่งทั้งหมด','all',0],['ผ่าน','pass',0],['ไม่ผ่าน','fail',0],['% ผ่าน','pct',1],['C ยังไม่แก้','c',0]],sort:'pct'},
+  eip:{name:'Eclaim IP UC',cols:[['ส่งทั้งหมด','all',0],['ผ่าน','pass',0],['ไม่ผ่าน','fail',0],['% ผ่าน','pct',1],['C ยังไม่แก้','c',0]],sort:'pct'},
+  oop:{name:'Eclaim OP สิทธิอื่น',cols:[['ส่งทั้งหมด','all',0],['ผ่าน','pass',0],['ไม่ผ่าน','fail',0],['% ผ่าน','pct',1],['C ยังไม่แก้','c',0]],sort:'pct'},
+  oip:{name:'Eclaim IP สิทธิอื่น',cols:[['ส่งทั้งหมด','all',0],['ผ่าน','pass',0],['ไม่ผ่าน','fail',0],['% ผ่าน','pct',1],['C ยังไม่แก้','c',0]],sort:'pct'},
+  ip30:{name:'ส่ง IP ภายใน 30 วัน',cols:[['ส่งทั้งหมด (ครั้ง)','all',0],['ภายใน 30 วัน','in30',0],['% ภายใน 30 วัน','pct',1]],sort:'pct'}};
+function renderKpi(K){
+  const keys=Object.keys(KPIS).filter(k=>K[k]&&Object.keys(K[k]).length); if(!keys.includes(S.kpi)) S.kpi=keys[0];
+  $('kpiTabs').innerHTML=keys.map(k=>`<button type="button" data-k="${k}" aria-pressed="${k===S.kpi}">${KPIS[k].name}</button>`).join('');
+  const def=KPIS[S.kpi], data=K[S.kpi]||{};
+  const rows=Object.entries(data).filter(([c])=>isHosp(c,nm(c))).sort((a,b)=>(b[1][def.sort]||0)-(a[1][def.sort]||0));
+  const f=(v,d)=>v==null?'–':d===4?Number(v).toFixed(4):d===1?Number(v).toFixed(1)+'%':d===2?fmt(v):fmt0(v);
+  $('kpiH').textContent=`${def.name} · ปีงบ ${S.fy}`;
+  $('tKpi').innerHTML=`<thead><tr><th>#</th><th style="text-align:left">โรงพยาบาล</th>${def.cols.map(c=>`<th>${c[0]}</th>`).join('')}</tr></thead><tbody>`+
+    rows.map(([c,v],i)=>`<tr class="${c===S.home?'home':''}"><td>${i+1}</td><td style="text-align:left"><span class="hn"><i class="dot" style="background:${hc(c)}"></i>${esc(nm(c))}${c===S.home?'<span class="home-tag">รพ.เรา</span>':''}</span></td>${def.cols.map(col=>`<td>${f(v[col[1]],col[2])}</td>`).join('')}</tr>`).join('')+'</tbody>';
+  const sc=def.cols.find(c=>c[1]===def.sort); const isP=sc[2]===1;
+  legend('cKpi',LEG3,'เรียงตาม '+sc[0]);
+  $('cKpi').innerHTML=rankRows(rows.map(([c,v])=>({c,segs:[{v:v[def.sort]||0,col:hc(c)}],lab:f(v[def.sort],sc[2])+(S.kpi==='ip'?` <span class="muted">· ${fmt0(v.n||0)} ครั้ง · CMI ${v.cmi!=null?Number(v.cmi).toFixed(2):'–'}</span>`:v.all!=null?` <span class="muted">· ${fmt0(v.all)} รายการ</span>`:'')})),isP?100:0);
+  $('kpiNote').textContent=S.kpi==='ip'?'ปีงบตามวันจำหน่าย จาก MIS 2.1 · CMI = AdjRW ÷ จำนวนครั้ง':S.kpi==='ip30'?'จาก MIS 2.2 ระยะเวลาการส่งข้อมูลผู้ป่วยใน':'จาก MIS 0-Eclaim Data รวมทุกเดือนในปีงบ · C ยังไม่แก้ = ข้อมูลไม่ผ่านที่ยังไม่ได้แก้ไข';
+}
+document.addEventListener('change',e=>{ if(e.target.id==='selProv'){ S.selProv=+e.target.value; renderExtra(); } if(e.target.id==='selHosp'){ S.selHosp=+e.target.value; renderExtra(); } });
+document.addEventListener('click',e=>{ const b=e.target.closest('#kpiTabs [data-k]'); if(!b) return; S.kpi=b.dataset.k; renderExtra(); });
+
+/* ---------- source + export ---------- */
+const SRC_MENU={'s-ov':'P9.1 สิทธิกรมบัญชีกลาง, P9.2 สิทธิ อปท., P1.1 ผู้ป่วยนอกฉุกเฉิน (OPAE), P1.4 Walk-in (เหตุสมควร) รายงานระดับจังหวัด',
+  's-rep':()=>({ofc:'P9.1 ผู้รับบริการ สิทธิกรมบัญชีกลาง',lgo:'P9.2 ผู้รับบริการ สิทธิพนักงานส่วนท้องถิ่น',opae:'P1.1 ผู้ป่วยนอกกรณีอุบัติเหตุ/ฉุกเฉิน (OPAE)',walkin:'P1.4 ผู้ป่วยนอกกรณีเหตุสมควร (WALKIN)'}[S.rep])+' รายงานระดับจังหวัด',
+  's-fund':'0.1 รายรับแยกกองทุน (ทุกกองทุน) รายหน่วยบริการ','s-stmt':'0.2 Statement UC พึงรับ (REP) เทียบจ่ายจริง (STM)',
+  's-svc':()=>({moph:'MOPH-Claim',ktp:'KTP (Krungthai Digital Health Platform)',inst:'อวัยวะเทียม/อุปกรณ์ในการบำบัดรักษาโรค',hc:'บริการค่าใช้จ่ายสูง (ยาละลายลิ่มเลือด เคมีบำบัด/รังสีรักษา ต้อกระจก นิ่ว)'}[S.svc]),
+  's-kpi':()=>S.kpi==='ip'?'2.1 ผลงานบริการผู้ป่วยใน สิทธิ UC':S.kpi==='ip30'?'2.2 ระยะเวลาการส่งข้อมูลผู้ป่วยใน':'0-Eclaim Data (ผลการตรวจสอบข้อมูล e-Claim)',
+  's-all':()=>{ const X=D.extra&&D.extra[S.fy]; const t=X&&X.prov&&X.prov[S.selProv]; return t?t.menu:'เมนูตามที่เลือก'; },
+  's-month':'P9.1 / P9.2 ชดเชยรายเดือน รายหน่วยบริการ'};
+function srcShort(sec){ const m=SRC_MENU[sec.id]; const menu=typeof m==='function'?m():m;
+  const t=D&&D.fetched?new Date(D.fetched).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Bangkok'}):'–';
+  return `ที่มา: สปสช. ระบบ NHSO-MIS for Hospital${menu?' · เมนู '+menu:''} · ปีงบ ${S.fy} · ข้อมูล ณ ${t}`; }
+function srcNotes(){ document.querySelectorAll('.wrap > section').forEach(sec=>{ let n=sec.querySelector(':scope > .src-note');
+  if(!n){ n=document.createElement('p'); n.className='note src-note'; sec.appendChild(n); }
+  n.innerHTML=`${esc(srcShort(sec))} · <a href="${MIS_URL}" target="_blank" rel="noopener">mishos.nhso.go.th</a>`; }); }
+function xpToast(t,ms){ let el=$('xpMsg'); if(!el){ el=document.createElement('div'); el.id='xpMsg'; el.setAttribute('role','status'); document.body.appendChild(el); }
+  el.textContent=t; el.style.display='block'; clearTimeout(el._t); if(ms) el._t=setTimeout(()=>el.style.display='none',ms); }
+function secTitle(sec){ const h=sec.querySelector('.sec-h h2'); return (h?h.textContent:sec.id).trim(); }
+const clean=f=>f.replace(/[\\\/:*?"<>|]/g,' ');
+function numify(t){ const x=t.replace(/[,\s]/g,'').replace(/^[▲▼]\+?−?/,m=>m.includes('▼')||m.includes('−')?'-':'').replace(/%$/,''); return /^-?\d+(\.\d+)?$/.test(x)?+x:t.trim(); }
+function secTables(sec){ const out=[];
+  sec.querySelectorAll('table').forEach(t=>{ if(!t.rows.length) return;
+    const rows=[...t.rows].map(r=>[...r.cells].flatMap(c=>{ const v=numify(c.innerText||c.textContent||''); return Array(c.colSpan||1).fill('').map((_,i)=>i?'':v); }));
+    const keep=rows[0].map((_,ci)=>rows.length===1||rows.slice(1).some(r=>r[ci]!==''&&r[ci]!=null));
+    const h=t.closest('.panel,details')?.previousElementSibling; out.push([h&&h.tagName==='H3'?h.textContent:'',rows.map(r=>r.filter((_,ci)=>keep[ci]))]); });
+  return out; }
+async function snap(sec){
+  if(!window.htmlToImage) throw new Error('ไม่สามารถโหลดตัวสร้างรูป');
+  const bg=getComputedStyle(document.body).backgroundColor;
+  const cap=document.createElement('div'); cap.style.cssText='margin:0 0 10px;font-size:12.5px;color:var(--muted)';
+  cap.textContent=`${nm(S.home)} · เทียบกับ ${CL()} · ปีงบ ${S.fy} · Design by Moveon`;
+  sec.querySelector('.sec-h').after(cap);
+  try{ return await htmlToImage.toPng(sec,{pixelRatio:2,backgroundColor:bg,skipFonts:true,style:{margin:'0'},
+      filter:n=>!(n.classList&&(n.classList.contains('xp')||n.classList.contains('fold')||n.classList.contains('rep-tabs')))||(n.classList&&n.classList.contains('rep-tabs')&&false)}); }
+  finally{ cap.remove(); } }
+function dataURLtoBytes(u){ const b=atob(u.split(',')[1]); const a=new Uint8Array(b.length); for(let i=0;i<b.length;i++) a[i]=b.charCodeAt(i); return a; }
+async function saveFile(filename,data){
+  let dl=null; try{ dl=window.claude&&await claude.use('downloads'); }catch(e){}
+  if(dl){ try{ await dl.save({filename,data}); xpToast('บันทึกไฟล์แล้ว',2500); return; }
+    catch(e){ if(e&&e.code==='declined'){ xpToast('ยกเลิกการบันทึก',2000); return; } if(e&&e.code==='rate_limited'){ xpToast('มีหน้าต่างบันทึกเปิดอยู่แล้ว',2500); return; } } }
+  const a=document.createElement('a'); a.href=URL.createObjectURL(data instanceof Blob?data:new Blob([data])); a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); xpToast('ดาวน์โหลดแล้ว',2000); }
+async function addSheet(wb,sec,used){
+  let name=secTitle(sec).replace(/[\\\/\?\*\[\]:]/g,' ').slice(0,28)||sec.id; let n=name,i=2; while(used.has(n)) n=name.slice(0,26)+' '+(i++); used.add(n);
+  const ws=wb.addWorksheet(n); let r=1; const grey={color:{argb:'FF666666'},size:10};
+  ws.getCell(r,1).value=secTitle(sec); ws.getCell(r,1).font={bold:true,size:14}; r++;
+  ws.getCell(r,1).value=`${nm(S.home)} · เทียบกับ ${CL()} · ปีงบ ${S.fy} · Design by Moveon · Orapat Viriyaudomsiri`; ws.getCell(r,1).font=grey; r++;
+  ws.getCell(r,1).value=srcShort(sec); ws.getCell(r,1).font=grey; r++;
+  ws.getCell(r,1).value={text:MIS_URL,hyperlink:MIS_URL}; ws.getCell(r,1).font={color:{argb:'FF2A78D6'},underline:true,size:10}; r+=2;
+  try{ const url=await snap(sec); const img=wb.addImage({base64:url,extension:'png'}); const W=sec.offsetWidth,H=sec.offsetHeight, w=Math.min(900,W), h=Math.round(H*w/W);
+    ws.addImage(img,{tl:{col:0,row:r-1},ext:{width:w,height:h}}); r+=Math.ceil(h/20)+2; }catch(e){ ws.getCell(r,1).value='(สร้างภาพกราฟไม่สำเร็จ)'; r+=2; }
+  for(const [h,rows] of secTables(sec)){
+    if(h){ ws.getCell(r,1).value=h; ws.getCell(r,1).font={bold:true}; r++; }
+    rows.forEach((row,ri)=>{ row.forEach((v,ci)=>{ const c=ws.getCell(r,ci+1); c.value=v===''?null:v;
+      if(typeof v==='number') c.numFmt=Number.isInteger(v)?'#,##0':'#,##0.00';
+      if(ri===0){ c.font={bold:true,color:{argb:'FFFFFFFF'}}; c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF14613E'}}; c.alignment={wrapText:true,vertical:'middle'}; } }); r++; });
+    r+=2; }
+  ws.getCell(r,1).value=srcShort(sec)+' · '+MIS_URL; ws.getCell(r,1).font={...grey,italic:true};
+  ws.columns.forEach((c,i)=>{ c.width=i===0?34:i===1?28:16; }); }
+async function xpExcel(secs,fname){
+  if(!window.ExcelJS){ xpToast('โหลดตัวสร้าง Excel ไม่สำเร็จ ลองรีเฟรช',3000); return; }
+  xpToast('กำลังสร้างไฟล์ Excel…'); const wb=new ExcelJS.Workbook(); wb.creator='Design by Moveon · Orapat Viriyaudomsiri'; const used=new Set();
+  for(const sec of secs) await addSheet(wb,sec,used);
+  await saveFile(fname,new Blob([await wb.xlsx.writeBuffer()])); }
+function initExport(){
+  document.querySelectorAll('.wrap > section').forEach(sec=>{ const h=sec.querySelector('.sec-h'); if(!h||h.querySelector('.xp')) return;
+    const box=document.createElement('div'); box.className='xp';
+    box.innerHTML=`<button type="button" data-xp="png" title="บันทึกส่วนนี้เป็นรูป PNG">⬇ รูปกราฟ</button><button type="button" data-xp="xlsx" title="ส่งออก Excel (ตาราง + ภาพกราฟ)">⬇ Excel</button>`;
+    h.appendChild(box);
+    box.addEventListener('click',async e=>{ const b=e.target.closest('[data-xp]'); if(!b) return; box.classList.add('xp-busy');
+      const base=clean(`${secTitle(sec)}_${nm(S.home)}`).slice(0,120);
+      try{ if(b.dataset.xp==='png'){ xpToast('กำลังสร้างรูป…'); await saveFile(base+'.png',new Blob([dataURLtoBytes(await snap(sec))])); }
+        else await xpExcel([sec],base+'.xlsx'); }catch(err){ xpToast('ส่งออกไม่สำเร็จ: '+(err.message||err),4000); }
+      box.classList.remove('xp-busy'); }); });
+  $('xpAll').addEventListener('click',async e=>{ const b=e.currentTarget; b.classList.add('xp-busy');
+    try{ await xpExcel([...document.querySelectorAll('.wrap > section')].filter(s=>!s.hidden),clean(`MIS บุรีรัมย์_${nm(S.home)}_ปีงบ${S.fy}.xlsx`)); }
+    catch(err){ xpToast('ส่งออกไม่สำเร็จ: '+(err.message||err),4000); } b.classList.remove('xp-busy'); }); }
+function render(){ if(!D) return; buildControls();
+  $('mastSub').textContent=`ปีงบประมาณ ${S.fy} · ${Object.keys(NAMES).length} โรงพยาบาลและหน่วยบริการในจังหวัดบุรีรัมย์ · สิทธิข้าราชการ อปท. ผู้ป่วยนอกฉุกเฉิน และ Walk-in`;
+  renderChips(); renderOverview(); renderReport(); renderFunds(); renderExtra(); renderMonthly(); srcNotes(); }
+
+$('fy').addEventListener('change',e=>{ S.fy=e.target.value; render(); });
+$('home').addEventListener('change',e=>{ S.home=e.target.value; lsSet('nhso-transfer-home-v1',S.home); setMulti(sizePeers(4)); render(); });
+$('cmp').addEventListener('change',e=>{ S.cmp=e.target.value; render(); });
+$('utype').addEventListener('change',e=>{ S.utype=e.target.value; renderReport(); });
+initExport();
+document.addEventListener('click',e=>{ const rm=e.target.closest('[data-rm]'); if(rm){ setMulti(multi().filter(c=>c!==rm.dataset.rm)); render(); return; }
+  if(e.target.closest('#sizeBtn')){ setMulti(sizePeers(4)); render(); } });
+document.addEventListener('change',e=>{ if(e.target.id==='addMulti'&&e.target.value){ setMulti([...multi(),e.target.value]); render(); } });
+document.addEventListener('click',e=>{ if(e.target.closest('.rep-tabs button')) setTimeout(()=>D&&srcNotes(),0); });
+document.addEventListener('change',e=>{ if(e.target.id==='selProv') setTimeout(()=>D&&srcNotes(),0); });
+$('repTabs').addEventListener('click',e=>{ const b=e.target.closest('[data-r]'); if(!b) return; S.rep=b.dataset.r; renderReport(); });
+$('monTabs').addEventListener('click',e=>{ const b=e.target.closest('[data-m]'); if(!b) return; S.mon=b.dataset.m; renderMonthly(); });
+
+(async function(){
+  try{ const r=await fetch('mis.json',{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); D=await r.json();
+    const t=new Date(D.fetched).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Bangkok'});
+    $('updated').innerHTML=`<span class="live"></span>ที่มาข้อมูล: สปสช. ระบบ NHSO-MIS for Hospital (<a href="${MIS_URL}" target="_blank" rel="noopener" style="color:inherit">mishos.nhso.go.th</a>) · ข้อมูล ณ <b>${esc(t)}</b>`;
+    render();
+  }catch(e){ $('mastSub').textContent='โหลดข้อมูลไม่สำเร็จ ('+e.message+') ลองรีเฟรชหน้าอีกครั้ง'; }
+})();
+</script>
+
+</body></html>
