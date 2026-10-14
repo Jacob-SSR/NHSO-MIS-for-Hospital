@@ -40,7 +40,19 @@ npm run build && npm start
 
 > GitHub รันงานตามเวลาเฉพาะบน default branch เท่านั้น ต้อง merge เข้า branch หลักก่อน
 
-### รันบนเครื่องเซิร์ฟเวอร์ รพ. แทน GitHub Actions
+### ให้ GitHub Actions รันบนเครื่องใน รพ. (แนะนำ)
+
+เว็บ SMT และ MIS ไม่รับการเชื่อมต่อจากเครื่องของ GitHub ที่อยู่ต่างประเทศ (ขึ้น `fetch failed` / `UND_ERR_CONNECT_TIMEOUT`)
+ให้ติดตั้ง self-hosted runner บนคอมพิวเตอร์ใน รพ. ที่เปิดเครื่องไว้ตลอด แล้ว workflow ทั้งหมดจะรันจากเครื่องนั้นแทน:
+
+1. ติดตั้ง Git (Windows ใช้ Git for Windows ซึ่งมี Git Bash มาด้วย)
+2. GitHub → Settings → Actions → Runners → **New self-hosted runner** เลือก Windows หรือ Linux แล้วทำตามคำสั่งที่หน้าเว็บให้ (ดาวน์โหลด, `config`, ติดตั้งเป็น service)
+3. GitHub → Settings → Secrets and variables → Actions → แท็บ **Variables** → เพิ่ม `RUNNER` = `self-hosted`
+4. Actions → เลือก workflow → Run workflow เพื่อทดสอบ
+
+ลบตัวแปร `RUNNER` เมื่อต้องการกลับไปใช้เครื่องของ GitHub
+
+### รันบนเครื่องเซิร์ฟเวอร์ รพ. ด้วย cron (ไม่ใช้ GitHub Actions)
 
 ถ้าเว็บ SMT หรือ MIS ไม่ตอบ request จากเครื่องของ GitHub (อยู่ต่างประเทศ) ให้รันบนเครื่องใน รพ. ที่มี Node.js 20 ขึ้นไป:
 

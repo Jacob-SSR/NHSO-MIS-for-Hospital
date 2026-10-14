@@ -22,9 +22,14 @@ concurrency:
   group: smt-notify
   cancel-in-progress: false
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   notify:
-    runs-on: ubuntu-latest
+    # set repository variable RUNNER=self-hosted to run on a machine inside the hospital (Thai IP)
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4

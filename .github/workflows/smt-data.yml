@@ -14,9 +14,14 @@ concurrency:
   group: smt-data
   cancel-in-progress: false
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   refresh:
-    runs-on: ubuntu-latest
+    # set repository variable RUNNER=self-hosted to run on a machine inside the hospital (Thai IP)
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4

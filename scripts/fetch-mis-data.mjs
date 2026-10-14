@@ -59,7 +59,7 @@ async function post(path, body, { tries = 3 } = {}) {
       const j = JSON.parse(text);
       return Array.isArray(j) ? j : [];
     } catch (e) {
-      last = e;
+      last = e.cause ? new Error(`${e.message} (${e.cause.code || e.cause.message}) — ${API}${path}`) : e;
       await sleep(1500 * (t + 1));
     }
   }
