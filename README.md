@@ -4,76 +4,73 @@
 
 | ปุ่ม | เนื้อหา | ไฟล์ |
 | --- | --- | --- |
-| เงินโอน สปสช. | การโอนเงินกองทุนรายหน่วยบริการ จากระบบ Smart Money Transfer (smt.nhso.go.th) | `public/dashboards/smt/` (`data.json`) |
-| ผลงาน MIS | ผลงานบริการและการชดเชย จาก NHSO-MIS for Hospital (mishos.nhso.go.th) | `public/dashboards/mis/` (`mis.json`) |
+| เงินโอน สปสช. | การโอนเงินกองทุนรายหน่วยบริการ จากระบบ Smart Money Transfer (smt.nhso.go.th) | `public/dashboards/smt/` + `data/smt.json` |
+| ผลงาน MIS | ผลงานบริการและการชดเชย จาก NHSO-MIS for Hospital (mishos.nhso.go.th) | `public/dashboards/mis/` + `data/mis.json` |
 | แจ้งเตือน LINE | สถานะระบบแจ้งเตือน ตัวอย่างข้อความ และขั้นตอนตั้งค่า | `app/notify-panel.tsx` |
 
 ลิงก์ตรงไปแต่ละหน้า: `/?view=smt`, `/?view=mis`, `/?view=notify`
 
-## รันบนเครื่อง
+## ติดตั้งด้วย Docker (port 5200)
+
+ต้องรันบนเครื่องที่อยู่ในประเทศไทย เพราะเว็บ smt.nhso.go.th และ mishos.nhso.go.th ไม่รับการเชื่อมต่อจากต่างประเทศ
+
+```bash
+git clone https://github.com/Jacob-SSR/NHSO-MIS-for-Hospital.git
+cd NHSO-MIS-for-Hospital
+cp .env.example .env          # ใส่ MOPH_NOTIFY_CLIENT_KEY / MOPH_NOTIFY_SECRET_KEY
+docker compose up -d --build  # เปิด http://<ip เครื่อง>:5200
+```
+
+มี 2 container ใช้ image เดียวกัน และใช้ volume `planfin-data` ร่วมกัน:
+
+| service | หน้าที่ |
+| --- | --- |
+| `web` | เว็บแดชบอร์ดที่ port 5200 อ่านไฟล์ข้อมูลจาก volume ทุกครั้งที่มีคนเปิด จึงเห็นข้อมูลใหม่ทันทีโดยไม่ต้อง build ใหม่ |
+| `worker` | `scripts/scheduler.mjs` เช็กเงินโอนและแจ้งเตือนทุก 30 นาที, อัปเดตข้อมูล SMT ทุกวัน 07:10 น. และ MIS 07:25 น. (เวลาไทย) ถ้าเครื่องปิดอยู่ตอนนั้น จะอัปเดตทันทีที่เปิดเครื่อง |
+
+คำสั่งที่ใช้บ่อย:
+
+```bash
+docker compose logs -f worker                                        # ดูการทำงานของงานตามเวลา
+docker compose exec worker node scripts/smt-notify.mjs --test        # ทดสอบส่งข้อความเข้ากลุ่ม LINE
+docker compose exec worker node scripts/fetch-smt-data.mjs           # อัปเดตข้อมูลเงินโอนเดี๋ยวนี้
+docker compose exec worker node scripts/fetch-mis-data.mjs           # อัปเดตข้อมูล MIS เดี๋ยวนี้
+git pull && docker compose up -d --build                             # อัปเดตโปรแกรม (ข้อมูลใน volume ไม่หาย)
+```
+
+ตั้งค่าเพิ่มเติมใน `.env` ได้ (ดู `.env.example`): `DASHBOARD_URL` (ปุ่มลิงก์ใต้ข้อความ LINE เช่น `http://192.168.1.10:5200/?view=smt`),
+`NOTIFY_INTERVAL_MINUTES`, `SMT_DATA_TIME`, `MIS_DATA_TIME` แก้แล้วสั่ง `docker compose up -d` อีกครั้ง
+
+## พัฒนาบนเครื่อง (ไม่ใช้ Docker)
 
 ```bash
 npm install
-npm run dev        # http://localhost:3000
-npm run build && npm start
+npm run dev        # http://localhost:3000 (อ่านข้อมูลจากโฟลเดอร์ data/)
 ```
 
 ## ระบบแจ้งเตือนเงินโอน (MOPH Notify)
 
-ทุกครั้งที่ สปสช. โอนเงินเข้า รพ. 10909 ไม่ว่าจะมาจากกองทุนไหน สคริปต์ `scripts/smt-notify.mjs` จะส่งข้อความ Flex เข้ากลุ่ม LINE **Planfin HC10909**:
+ทุกครั้งที่ สปสช. โอนเงินเข้า รพ. 10909 ไม่ว่าจะมาจากกองทุนไหน `scripts/smt-notify.mjs` จะส่งข้อความ Flex เข้ากลุ่ม LINE **Planfin HC10909**:
 ยอดโอนสุทธิ วันที่โอน ยอดชะลอ/หัก และรายการว่าเงินมาจากกองทุนย่อยไหน สิทธิอะไร
 
-### ตั้งค่า (ครั้งเดียว)
+ตั้งค่าครั้งเดียว:
 
 1. สร้างกลุ่ม LINE ชื่อ `Planfin HC10909` (ต้องตั้งชื่อก่อนเพิ่มบอท)
 2. เชิญบัญชี LINE **หมอพร้อม** เข้ากลุ่ม
 3. Admin หน่วยบริการเข้า CMS MOPH Notify → กลุ่มบอท → จัดการ → อนุมัติ
-4. กดรูปตาที่ช่อง API Key แล้วนำ Client_ID และ Secret ไปใส่เป็น GitHub secrets
-   (Settings → Secrets and variables → Actions):
-   - `MOPH_NOTIFY_CLIENT_KEY` = Client_ID
-   - `MOPH_NOTIFY_SECRET_KEY` = Secret
-   - (ไม่บังคับ) ตัวแปร `DASHBOARD_URL` ใน Variables จะแสดงปุ่ม "ดูรายละเอียดในแดชบอร์ด" ใต้ข้อความ
-5. Actions → **แจ้งเตือนเงินโอน สปสช. (MOPH Notify)** → Run workflow → mode `test` ถ้าข้อความเข้ากลุ่มแสดงว่าใช้งานได้
+4. กดรูปตาที่ช่อง API Key แล้วนำ Client_ID / Secret ไปใส่ใน `.env` เป็น `MOPH_NOTIFY_CLIENT_KEY` / `MOPH_NOTIFY_SECRET_KEY` แล้วสั่ง `docker compose up -d`
+5. `docker compose exec worker node scripts/smt-notify.mjs --test` ถ้าข้อความเข้ากลุ่มแสดงว่าใช้งานได้
 
-หลังจากนั้น workflow จะตรวจทุก 30 นาทีเอง ครั้งแรกระบบจะจำรายการที่มีอยู่แล้วไว้ (ไม่ส่งย้อนหลัง) และส่งข้อความ "เริ่มระบบแจ้งเตือน" เข้ากลุ่ม
-รายการที่แจ้งแล้วเก็บใน `public/notify/state.json` (workflow commit กลับเข้า repo) และแสดงในหน้า "แจ้งเตือน LINE"
+ครั้งแรกระบบจะจำรายการที่มีอยู่แล้วไว้ (ไม่ส่งย้อนหลัง) และส่งข้อความ "เริ่มระบบแจ้งเตือน" เข้ากลุ่ม ถ้ายังไม่ได้ใส่ key รายการใหม่จะรอไว้และส่งเมื่อใส่ key แล้ว
+รายการที่แจ้งแล้วเก็บใน `notify-state.json` ใน volume และแสดงในหน้า "แจ้งเตือน LINE"
+ตัวเลือกอื่นของสคริปต์: `--dry-run` แสดงข้อความที่จะส่งโดยไม่ส่งจริง, `--seed` จำรายการปัจจุบันทั้งหมดโดยไม่แจ้ง
 
-> GitHub รันงานตามเวลาเฉพาะบน default branch เท่านั้น ต้อง merge เข้า branch หลักก่อน
+## แหล่งข้อมูล
 
-### ให้ GitHub Actions รันบนเครื่องใน รพ. (แนะนำ)
+- **เงินโอน (SMT):** `scripts/fetch-smt-data.mjs` ดึงรายงานการโอนเงินแยกตามหน่วยบริการของทุก รพ. ในจังหวัด ย้อนหลัง 3 ปีงบ
+- **ผลงาน MIS:** `scripts/fetch-mis-data.mjs` ดึงจากรายงานเดียวกับที่หน้าเว็บ mishos.nhso.go.th ใช้ (ไม่ต้องล็อกอิน) ได้แก่ 9.1 กรมบัญชีกลาง, 9.2 อปท., 1.1 OPAE, 1.4 Walk-in, 0.1 รายรับแยกกองทุน, 0.2 Statement UC, 4.1–4.5 ค่าใช้จ่ายสูง/อุปกรณ์, 8.2 MOPH-Claim, 8.3 KTP
 
-เว็บ SMT และ MIS ไม่รับการเชื่อมต่อจากเครื่องของ GitHub ที่อยู่ต่างประเทศ (ขึ้น `fetch failed` / `UND_ERR_CONNECT_TIMEOUT`)
-ให้ติดตั้ง self-hosted runner บนคอมพิวเตอร์ใน รพ. ที่เปิดเครื่องไว้ตลอด แล้ว workflow ทั้งหมดจะรันจากเครื่องนั้นแทน:
-
-1. ติดตั้ง Git (Windows ใช้ Git for Windows ซึ่งมี Git Bash มาด้วย)
-2. GitHub → Settings → Actions → Runners → **New self-hosted runner** เลือก Windows หรือ Linux แล้วทำตามคำสั่งที่หน้าเว็บให้ (ดาวน์โหลด, `config`, ติดตั้งเป็น service)
-3. GitHub → Settings → Secrets and variables → Actions → แท็บ **Variables** → เพิ่ม `RUNNER` = `self-hosted`
-4. Actions → เลือก workflow → Run workflow เพื่อทดสอบ
-
-ลบตัวแปร `RUNNER` เมื่อต้องการกลับไปใช้เครื่องของ GitHub
-
-### รันบนเครื่องเซิร์ฟเวอร์ รพ. ด้วย cron (ไม่ใช้ GitHub Actions)
-
-ถ้าเว็บ SMT หรือ MIS ไม่ตอบ request จากเครื่องของ GitHub (อยู่ต่างประเทศ) ให้รันบนเครื่องใน รพ. ที่มี Node.js 20 ขึ้นไป:
-
-```bash
-# .env.local
-MOPH_NOTIFY_CLIENT_KEY=...
-MOPH_NOTIFY_SECRET_KEY=...
-
-node --env-file=.env.local scripts/smt-notify.mjs --test     # ทดสอบส่งข้อความ
-node --env-file=.env.local scripts/smt-notify.mjs            # ตรวจและแจ้งเตือน 1 รอบ
-```
-
-ตั้ง cron ทุก 30 นาที: `*/30 * * * * cd /path/to/repo && node --env-file=.env.local scripts/smt-notify.mjs >> notify.log 2>&1`
-(Windows ใช้ Task Scheduler รันคำสั่งเดียวกัน)
-
-ตัวเลือกอื่น: `--dry-run` แสดงข้อความที่จะส่งโดยไม่ส่งจริง, `--seed` จำรายการปัจจุบันทั้งหมดโดยไม่แจ้ง
-
-## อัปเดตข้อมูลแดชบอร์ด
-
-- **เงินโอน (SMT):** workflow **อัปเดตข้อมูลเงินโอน SMT** รัน `node scripts/fetch-smt-data.mjs` ทุกวัน 07:10 น. แล้ว commit `public/dashboards/smt/data.json` (สั่งรันเองได้จากแท็บ Actions)
-- **ผลงาน MIS:** workflow **อัปเดตข้อมูลผลงาน MIS** รัน `node scripts/fetch-mis-data.mjs` ทุกวัน 07:25 น. แล้ว commit `public/dashboards/mis/mis.json` ดึงจากรายงานเดียวกับที่หน้าเว็บ mishos.nhso.go.th ใช้ (ไม่ต้องล็อกอิน) ได้แก่ 9.1 กรมบัญชีกลาง, 9.2 อปท., 1.1 OPAE, 1.4 Walk-in, 0.1 รายรับแยกกองทุน, 0.2 Statement UC, 4.1–4.5 ค่าใช้จ่ายสูง/อุปกรณ์, 8.2 MOPH-Claim, 8.3 KTP
+ถ้าดึงข้อมูลได้น้อยผิดปกติ สคริปต์จะไม่เขียนทับไฟล์เดิม
 
 ## ที่มา
 

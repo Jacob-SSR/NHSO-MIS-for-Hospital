@@ -285,7 +285,7 @@ const STEPS: { title: string; body: React.ReactNode; tone: string }[] = [
     tone: "from-indigo-500 to-violet-700",
     body: (
       <>
-        กดรูปตา <span aria-hidden>👁</span> ที่ช่อง API Key แล้วนำค่าไปใส่ใน GitHub → Settings → Secrets and variables → Actions
+        กดรูปตา <span aria-hidden>👁</span> ที่ช่อง API Key แล้วนำค่าไปใส่ในไฟล์ <code className="font-mono">.env</code> บนเครื่องที่รัน Docker แล้วสั่ง <code className="font-mono">docker compose up -d</code>
         <span className="mt-2 flex flex-wrap gap-1.5">
           <CopyChip text="MOPH_NOTIFY_CLIENT_KEY" mono />
           <CopyChip text="MOPH_NOTIFY_SECRET_KEY" mono />
@@ -296,7 +296,12 @@ const STEPS: { title: string; body: React.ReactNode; tone: string }[] = [
   {
     title: "ทดสอบส่งข้อความ",
     tone: "from-fuchsia-500 to-purple-700",
-    body: <>ไปที่แท็บ Actions → “แจ้งเตือนเงินโอน สปสช.” → Run workflow เลือก mode = test ถ้าข้อความเข้ากลุ่มแสดงว่าใช้งานได้</>,
+    body: (
+      <>
+        รันคำสั่งนี้บนเครื่องที่รัน Docker ถ้าข้อความเข้ากลุ่มแสดงว่าใช้งานได้
+        <CopyChip text="docker compose exec worker node scripts/smt-notify.mjs --test" mono />
+      </>
+    ),
   },
 ];
 

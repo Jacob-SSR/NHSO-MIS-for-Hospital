@@ -1,14 +1,14 @@
 #!/usr/bin/env node
-// Rebuild public/dashboards/mis/mis.json from NHSO-MIS for Hospital (mishos.nhso.go.th).
+// Rebuild data/mis.json (served as /dashboards/mis/mis.json) from NHSO-MIS for Hospital (mishos.nhso.go.th).
 // Uses the same report endpoints the MIS web app calls (no login): simplestudio/ss_statement.php
 // get_tabledata by report id, the m040x high-cost endpoints, and l_hospital.php for the unit list.
 //
-//   node scripts/fetch-mis-data.mjs [out=public/dashboards/mis/mis.json]
+//   node scripts/fetch-mis-data.mjs [out=$DATA_DIR/mis.json]
 // Env: PROVINCE_ID (default 3100 = บุรีรัมย์), HCODE (any unit in the province, default 10909)
 
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, rename, writeFile } from 'node:fs/promises';
 
-const OUT = process.argv[2] || 'public/dashboards/mis/mis.json';
+const OUT = process.argv[2] || `${process.env.DATA_DIR || 'data'}/mis.json`;
 const API = process.env.MIS_API_URL || 'https://mishos.nhso.go.th/mis_hos_apixam/';
 const PROVINCE = process.env.PROVINCE_ID || '3100';
 const HCODE = process.env.HCODE || '10909';
@@ -185,7 +185,8 @@ async function main() {
     fetched: new Date().toISOString(),
     years, monthly, funds,
   };
-  await writeFile(OUT, JSON.stringify(data));
+  await writeFile(OUT + '.tmp', JSON.stringify(data));
+  await rename(OUT + '.tmp', OUT); // the web server never sees a half-written file
   console.log(`ok ${calls} requests -> ${OUT}`);
 }
 

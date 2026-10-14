@@ -7,10 +7,10 @@
 //   node scripts/smt-notify.mjs --test       send one test message to the LINE group
 //
 // Env: MOPH_NOTIFY_CLIENT_KEY, MOPH_NOTIFY_SECRET_KEY (from the MOPH Notify CMS, step 4),
-//      HCODE (default 10909), DASHBOARD_URL (optional link button), STATE_FILE (default public/notify/state.json)
+//      HCODE (default 10909), DASHBOARD_URL (optional link button), STATE_FILE (default $DATA_DIR/notify-state.json)
 
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { fetchTransfers, fiscalYear, normalize } from './lib/smt.mjs';
 import { baht, rightOf, sendNotify, thDate, transferBubble } from './lib/moph-notify.mjs';
@@ -22,7 +22,7 @@ const TEST = args.has('--test');
 
 const HCODE = (process.env.HCODE || '10909').replace(/^0+/, '');
 const GROUP = process.env.LINE_GROUP_NAME || `Planfin HC${HCODE}`;
-const STATE_FILE = process.env.STATE_FILE || 'public/notify/state.json';
+const STATE_FILE = process.env.STATE_FILE || `${process.env.DATA_DIR || 'data'}/notify-state.json`;
 const DASHBOARD_URL = process.env.DASHBOARD_URL || '';
 const keys = { clientKey: process.env.MOPH_NOTIFY_CLIENT_KEY || '', secretKey: process.env.MOPH_NOTIFY_SECRET_KEY || '' };
 const MAX_RECENT = 40;
@@ -52,7 +52,8 @@ async function loadState() {
 
 async function saveState(state) {
   await mkdir(dirname(STATE_FILE), { recursive: true });
-  await writeFile(STATE_FILE, JSON.stringify(state, null, 1) + '\n');
+  await writeFile(STATE_FILE + '.tmp', JSON.stringify(state, null, 1) + '\n');
+  await rename(STATE_FILE + '.tmp', STATE_FILE);
 }
 
 async function main() {

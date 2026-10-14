@@ -1,14 +1,14 @@
 #!/usr/bin/env node
-// Rebuild public/dashboards/smt/data.json (every hospital in one province, current + two previous fiscal years)
-// from the SMT public report API. Node port of the dashboard's original in-browser fetch script; same output format.
+// Rebuild data/smt.json, served as /dashboards/smt/data.json (every hospital in one province, current + two
+// previous fiscal years) from the SMT public report API. Node port of the dashboard's original in-browser fetch script; same output format.
 //
-//   node scripts/fetch-smt-data.mjs [out=public/dashboards/smt/data.json]
+//   node scripts/fetch-smt-data.mjs [out=$DATA_DIR/smt.json]
 // Env: PROVINCE_ID (default 3100 = บุรีรัมย์)
 
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, rename, writeFile } from 'node:fs/promises';
 import { fetchTransfers, fiscalYear, smtPost } from './lib/smt.mjs';
 
-const OUT = process.argv[2] || 'public/dashboards/smt/data.json';
+const OUT = process.argv[2] || `${process.env.DATA_DIR || 'data'}/smt.json`;
 const PROVINCE = process.env.PROVINCE_ID || '3100';
 const r2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
 
@@ -53,7 +53,8 @@ async function main() {
   } catch (e) { if (String(e.message).startsWith('refusing')) throw e; }
 
   const data = { v: 1, source: 'smt.nhso.go.th budgetSummaryByVendorReport', fetched: now.toISOString(), fys: fys.map(String), hosp, counts, dict, rows };
-  await writeFile(OUT, JSON.stringify(data));
+  await writeFile(OUT + '.tmp', JSON.stringify(data));
+  await rename(OUT + '.tmp', OUT); // the web server never sees a half-written file
   console.log(`ok rows=${rows.length} hosp=${codes.length} -> ${OUT}`);
 }
 
