@@ -10,7 +10,8 @@
     "notify": "node scripts/smt-notify.mjs",
     "notify:test": "node scripts/smt-notify.mjs --test",
     "notify:dry": "node scripts/smt-notify.mjs --dry-run",
-    "data:smt": "node scripts/fetch-smt-data.mjs"
+    "data:smt": "node scripts/fetch-smt-data.mjs",
+    "data:mis": "node scripts/fetch-mis-data.mjs"
   },
   "dependencies": {
     "next": "16.4.0",

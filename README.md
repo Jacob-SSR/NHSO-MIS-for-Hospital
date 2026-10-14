@@ -42,7 +42,7 @@ npm run build && npm start
 
 ### รันบนเครื่องเซิร์ฟเวอร์ รพ. แทน GitHub Actions
 
-ถ้าเว็บ SMT ไม่ตอบ request จากเครื่องของ GitHub (อยู่ต่างประเทศ) ให้รันบนเครื่องใน รพ. ที่มี Node.js 20 ขึ้นไป:
+ถ้าเว็บ SMT หรือ MIS ไม่ตอบ request จากเครื่องของ GitHub (อยู่ต่างประเทศ) ให้รันบนเครื่องใน รพ. ที่มี Node.js 20 ขึ้นไป:
 
 ```bash
 # .env.local
@@ -61,7 +61,7 @@ node --env-file=.env.local scripts/smt-notify.mjs            # ตรวจแ�
 ## อัปเดตข้อมูลแดชบอร์ด
 
 - **เงินโอน (SMT):** workflow **อัปเดตข้อมูลเงินโอน SMT** รัน `node scripts/fetch-smt-data.mjs` ทุกวัน 07:10 น. แล้ว commit `public/dashboards/smt/data.json` (สั่งรันเองได้จากแท็บ Actions)
-- **ผลงาน MIS:** ระบบ MIS ต้องล็อกอิน จึงยังเป็นข้อมูล ณ 12 ต.ค. 2569 ถ้ามีไฟล์ใหม่ให้แทนที่ `public/dashboards/mis/mis.json` (รูปแบบเดิม)
+- **ผลงาน MIS:** workflow **อัปเดตข้อมูลผลงาน MIS** รัน `node scripts/fetch-mis-data.mjs` ทุกวัน 07:25 น. แล้ว commit `public/dashboards/mis/mis.json` ดึงจากรายงานเดียวกับที่หน้าเว็บ mishos.nhso.go.th ใช้ (ไม่ต้องล็อกอิน) ได้แก่ 9.1 กรมบัญชีกลาง, 9.2 อปท., 1.1 OPAE, 1.4 Walk-in, 0.1 รายรับแยกกองทุน, 0.2 Statement UC, 4.1–4.5 ค่าใช้จ่ายสูง/อุปกรณ์, 8.2 MOPH-Claim, 8.3 KTP
 
 ## ที่มา
 
